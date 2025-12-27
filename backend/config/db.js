@@ -1,4 +1,7 @@
 import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const sequelize = new Sequelize(
     process.env.DB_NAME,
@@ -21,13 +24,13 @@ const sequelize = new Sequelize(
 const connectDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log('✅ MySQL connected successfully');
+        console.log('MySQL connected successfully !!');
         
         // Sync database models (creates tables if they don't exist)
         await sequelize.sync({ alter: true });
-        console.log('✅ Database models synchronized');
+        console.log('Database models synchronized');
     } catch (error) {
-        console.error('❌ MySQL connection failed:', error.message);
+        console.error('MySQL connection failed:', error.message);
         process.exit(1);
     }
 }

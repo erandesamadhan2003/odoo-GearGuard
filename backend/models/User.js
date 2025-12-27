@@ -3,14 +3,16 @@ import { sequelize } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 
 const User = sequelize.define('User', {
-    id: {
+    userId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
+        field: 'user_id'
     },
     fullName: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
+        field: 'full_name',
         validate: {
             notEmpty: {
                 msg: 'Full name is required'
@@ -18,7 +20,7 @@ const User = sequelize.define('User', {
         }
     },
     email: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: false,
         unique: true,
         validate: {
@@ -29,54 +31,60 @@ const User = sequelize.define('User', {
         }
     },
     password: {
-        type: DataTypes.STRING,
-        allowNull: true, // Nullable for Google OAuth users
-        validate: {
-            // Only validate if password is provided (for local auth)
-            len: {
-                args: [6, Infinity],
-                msg: 'Password must be at least 6 characters'
-            }
-            // Note: Sequelize automatically skips validation when value is null
-        }
+        type: DataTypes.STRING(255),
+        allowNull: true // Nullable for Google OAuth users
     },
     googleId: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(255),
         allowNull: true,
         unique: true,
-        sparse: true
+        field: 'google_id'
     },
     authProvider: {
         type: DataTypes.ENUM('local', 'google'),
         defaultValue: 'local',
-        allowNull: false
+        allowNull: false,
+        field: 'auth_provider'
     },
     profilePicture: {
-        type: DataTypes.STRING,
-        defaultValue: '',
-        allowNull: true
+        type: DataTypes.STRING(500),
+        allowNull: true,
+        field: 'profile_picture'
+    },
+    role: {
+        type: DataTypes.ENUM('admin', 'manager', 'technician', 'user'),
+        defaultValue: 'user',
+        allowNull: false
+    },
+    createdAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'created_at'
+    },
+    updatedAt: {
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.NOW,
+        field: 'updated_at'
     }
 }, {
     tableName: 'users',
     timestamps: true,
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
     hooks: {
         beforeCreate: async (user) => {
-            // Lowercase email
             if (user.email) {
                 user.email = user.email.toLowerCase();
             }
-            // Hash password
             if (user.password && user.authProvider === 'local') {
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(user.password, salt);
             }
         },
         beforeUpdate: async (user) => {
-            // Lowercase email if changed
             if (user.changed('email') && user.email) {
                 user.email = user.email.toLowerCase();
             }
-            // Hash password if changed
             if (user.changed('password') && user.password) {
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(user.password, salt);

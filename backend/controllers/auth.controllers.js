@@ -1,8 +1,8 @@
 import { User } from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (userId) => {
+    return jwt.sign({ id: userId, userId }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE || '7d'
     });
 }
@@ -33,14 +33,14 @@ export const register = async (req, res) => {
             authProvider: 'local'
         });
 
-        const token = generateToken(user.id);
+        const token = generateToken(user.userId);
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
             token,
             user: {
-                id: user.id,
+                id: user.userId || user.id,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
@@ -93,14 +93,14 @@ export const login = async (req, res) => {
             });
         }
 
-        const token = generateToken(user.id);
+        const token = generateToken(user.userId);
 
         res.json({
             success: true,
             message: 'Login successful',
             token,
             user: {
-                id: user.id,
+                id: user.userId || user.id,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
@@ -118,7 +118,7 @@ export const login = async (req, res) => {
 };
 
 export const googleCallBack = async (req, res) => {
-    const token = generateToken(req.user.id);
+    const token = generateToken(req.user.userId || req.user.id);
 
     res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}&userId=${req.user.id}`);
 }
