@@ -11,7 +11,6 @@ import { EditRequestPage } from "./pages/requests/EditRequestPage";
 import { AuthCallBack } from "./pages/auth/AuthCallBack";
 import { useEffect, useState } from "react";
 
-
 const ProtectedRoute = ({ children }) => {
   const { token, isAuthenticated } = useSelector((state) => state.auth);
   const [shouldRender, setShouldRender] = useState(false);
@@ -82,25 +81,30 @@ const Router = createBrowserRouter([
     path: "/auth/callback",
     element: <AuthCallBack />,
   },
+  // {
+  //   path: "/dashboard",
+  //   element: (
+  //     <ProtectedRoute>
+  //       <Dashboard />
+  //     </ProtectedRoute>
+  //   ),
+  // },
   {
     path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    element: <Dashboard />,
+  },
+  ,{
+    path:"/requests",
+    element:<KanbanPage/>,
+  }
+  ,
+  {
+    path:"/requests/new",
+    element:<CreateRequestPage/>
   },
   {
-    path: "/requests",
-    element: (<KanbanPage />)
-  },
-  , {
-    path: "/requests/new",
-    element: (<CreateRequestPage />)
-  }
-  , {
-    path: "/requests/:id/edit",
-    element: (<EditRequestPage />)
+    path:"requests/:id/edit",
+    element:<EditRequestPage/>
   }
 ]);
 
@@ -108,6 +112,7 @@ function App() {
   return (
     <>
       <RouterProvider router={Router} />
+      {/* <Footer /> */}
     </>
   );
 }
