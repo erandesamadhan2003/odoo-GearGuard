@@ -93,6 +93,14 @@ export const createCategory = async (req, res) => {
         });
     } catch (error) {
         console.error('Create category error:', error);
+        
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Category name already exists'
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to create category'
@@ -127,6 +135,14 @@ export const updateCategory = async (req, res) => {
         });
     } catch (error) {
         console.error('Update category error:', error);
+        
+        if (error.name === 'SequelizeUniqueConstraintError') {
+            return res.status(400).json({
+                success: false,
+                message: 'Category name already exists'
+            });
+        }
+
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to update category'

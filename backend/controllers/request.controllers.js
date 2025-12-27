@@ -35,12 +35,12 @@ export const getAllRequests = async (req, res) => {
                 {
                     model: User,
                     as: 'createdBy',
-                    attributes: ['id', 'fullName', 'email']
+                    attributes: ['userId', 'fullName', 'email']
                 },
                 {
                     model: User,
                     as: 'assignedTo',
-                    attributes: ['id', 'fullName', 'email'],
+                    attributes: ['userId', 'fullName', 'email'],
                     required: false
                 }
             ],
@@ -85,12 +85,12 @@ export const getRequestById = async (req, res) => {
                 {
                     model: User,
                     as: 'createdBy',
-                    attributes: ['id', 'fullName', 'email']
+                    attributes: ['userId', 'fullName', 'email']
                 },
                 {
                     model: User,
                     as: 'assignedTo',
-                    attributes: ['id', 'fullName', 'email'],
+                    attributes: ['userId', 'fullName', 'email'],
                     required: false
                 },
                 {
@@ -100,7 +100,7 @@ export const getRequestById = async (req, res) => {
                         {
                             model: User,
                             as: 'changedBy',
-                            attributes: ['id', 'fullName']
+                            attributes: ['userId', 'fullName']
                         }
                     ],
                     order: [['changedAt', 'DESC']]
@@ -397,7 +397,7 @@ export const getCalendarRequests = async (req, res) => {
                 {
                     model: User,
                     as: 'assignedTo',
-                    attributes: ['id', 'fullName'],
+                    attributes: ['userId', 'fullName'],
                     required: false
                 }
             ],
@@ -431,7 +431,7 @@ export const getMyRequests = async (req, res) => {
                 {
                     model: User,
                     as: 'assignedTo',
-                    attributes: ['id', 'fullName', 'email'],
+                    attributes: ['userId', 'fullName', 'email'],
                     required: false
                 }
             ],
@@ -465,7 +465,7 @@ export const getAssignedToMeRequests = async (req, res) => {
                 {
                     model: User,
                     as: 'createdBy',
-                    attributes: ['id', 'fullName', 'email']
+                    attributes: ['userId', 'fullName', 'email']
                 }
             ],
             order: [['createdAt', 'DESC']]

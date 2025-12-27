@@ -9,7 +9,7 @@ const generateToken = (userId) => {
 
 export const register = async (req, res) => {
     try {
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password, role } = req.body;
 
         if (!fullName || !email || !password) {
             return res.status(400).json({
@@ -26,12 +26,24 @@ export const register = async (req, res) => {
             });
         }
 
-        const user = await User.create({
+        // Allow role setting during registration only for testing (in development mode)
+        // In production, roles should be assigned by admins only
+        const userData = {
             fullName,
             email,
             password,
             authProvider: 'local'
-        });
+        };
+
+        // Only allow role setting in development mode
+        if (role && process.env.NODE_ENV !== 'production') {
+            const allowedRoles = ['admin', 'manager', 'technician', 'user'];
+            if (allowedRoles.includes(role)) {
+                userData.role = role;
+            }
+        }
+
+        const user = await User.create(userData);
 
         const token = generateToken(user.userId);
 
@@ -41,10 +53,12 @@ export const register = async (req, res) => {
             token,
             user: {
                 id: user.userId || user.id,
+                userId: user.userId,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                role: user.role
             }
         });
     } catch (error) {

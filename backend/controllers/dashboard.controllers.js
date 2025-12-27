@@ -12,7 +12,7 @@ export const getDashboardStats = async (req, res) => {
         const requestsByStage = await MaintenanceRequest.findAll({
             attributes: [
                 'stage',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             group: ['stage']
         });
@@ -26,7 +26,7 @@ export const getDashboardStats = async (req, res) => {
         const requestsByTeam = await MaintenanceRequest.findAll({
             attributes: [
                 'maintenanceTeamId',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             include: [
                 {
@@ -48,7 +48,7 @@ export const getDashboardStats = async (req, res) => {
         const requestsByCategory = await MaintenanceRequest.findAll({
             attributes: [
                 'categoryId',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             include: [
                 {
@@ -70,7 +70,7 @@ export const getDashboardStats = async (req, res) => {
         const requestsByPriority = await MaintenanceRequest.findAll({
             attributes: [
                 'priority',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             group: ['priority']
         });
@@ -84,7 +84,7 @@ export const getDashboardStats = async (req, res) => {
         const requestsByType = await MaintenanceRequest.findAll({
             attributes: [
                 'requestType',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             group: ['requestType']
         });
@@ -101,7 +101,7 @@ export const getDashboardStats = async (req, res) => {
         const equipmentByStatus = await Equipment.findAll({
             attributes: [
                 'status',
-                [fn('COUNT', col('equipmentId')), 'count']
+                [fn('COUNT', literal('`Equipment`.`equipment_id`')), 'count']
             ],
             group: ['status']
         });
@@ -211,7 +211,7 @@ export const getRequestsByTeam = async (req, res) => {
             attributes: [
                 'maintenanceTeamId',
                 'stage',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             include: [
                 {
@@ -269,7 +269,7 @@ export const getRequestsByCategory = async (req, res) => {
             attributes: [
                 'categoryId',
                 'stage',
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             include: [
                 {
@@ -329,16 +329,16 @@ export const getRequestsOverTime = async (req, res) => {
 
         const requests = await MaintenanceRequest.findAll({
             attributes: [
-                [fn('DATE', col('createdAt')), 'date'],
-                [fn('COUNT', col('requestId')), 'count']
+                [fn('DATE', literal('`MaintenanceRequest`.`created_at`')), 'date'],
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
             ],
             where: {
                 createdAt: {
                     [Op.gte]: daysAgo
                 }
             },
-            group: [fn('DATE', col('createdAt'))],
-            order: [[fn('DATE', col('createdAt')), 'ASC']]
+            group: [fn('DATE', literal('`MaintenanceRequest`.`created_at`'))],
+            order: [[fn('DATE', literal('`MaintenanceRequest`.`created_at`')), 'ASC']]
         });
 
         const data = requests.map(item => ({
@@ -366,8 +366,8 @@ export const getTechnicianPerformance = async (req, res) => {
             attributes: [
                 'assignedToUserId',
                 'stage',
-                [fn('COUNT', col('requestId')), 'count'],
-                [fn('AVG', col('durationHours')), 'avgDuration']
+                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count'],
+                [fn('AVG', literal('`MaintenanceRequest`.`duration_hours`')), 'avgDuration']
             ],
             where: {
                 assignedToUserId: { [Op.not]: null }
