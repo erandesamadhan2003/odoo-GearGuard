@@ -7,7 +7,7 @@ import {
     deleteTeam,
     addTeamMember,
     removeTeamMember
-} from "@/services/maintenance.service";
+} from "@/services/teamMaintenance.service";
 
 const initialState = {
     teams: [],
