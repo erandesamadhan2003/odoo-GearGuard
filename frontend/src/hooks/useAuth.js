@@ -1,5 +1,6 @@
 import { googleLogin } from "@/services/auth.service";
 import { clearError, getCurrentUser, loginUser, logoutUser, registerUser, setCredentials, verifyUserToken } from "@/store/slices/authSlice";
+import { fetchAllUsers, fetchUserById, modifyUser, removeUser, fetchTechnicians } from "@/store/slices/userSlice";
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router";
@@ -9,16 +10,22 @@ export const useAuth = () => {
     const navigate = useNavigate();
     const hasCheckedAuth = useRef(false);
 
+    // Auth state
     const { user, token, loading, error, isAuthenticated } = useSelector((state) => state.auth);
 
+    // User management state
+    const { users, technicians, selectedUser, loading: userLoading, error: userError } = useSelector((state) => state.user);
+
+    // Check authentication on mount
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         if (storedToken && !user && !hasCheckedAuth.current) {
             hasCheckedAuth.current = true;
             dispatch(getCurrentUser());
         }
-    }, []);
+    }, [dispatch, user]);
 
+    // Authentication Methods
     const register = async (userData) => {
         try {
             const result = await dispatch(registerUser(userData)).unwrap();
@@ -93,23 +100,93 @@ export const useAuth = () => {
         }
     }
 
+    // User Management Methods
+    const getAllUsers = async () => {
+        try {
+            const result = await dispatch(fetchAllUsers()).unwrap();
+            return result;
+        } catch (err) {
+            console.error('Get all users error:', err);
+            throw err;
+        }
+    }
+
+    const getUserById = async (userId) => {
+        try {
+            const result = await dispatch(fetchUserById(userId)).unwrap();
+            return result;
+        } catch (err) {
+            console.error('Get user by ID error:', err);
+            throw err;
+        }
+    }
+
+    const updateUser = async (userId, userData) => {
+        try {
+            const result = await dispatch(modifyUser({ userId, userData })).unwrap();
+            return result;
+        } catch (err) {
+            console.error('Update user error:', err);
+            throw err;
+        }
+    }
+
+    const deleteUser = async (userId) => {
+        try {
+            const result = await dispatch(removeUser(userId)).unwrap();
+            return result;
+        } catch (err) {
+            console.error('Delete user error:', err);
+            throw err;
+        }
+    }
+
+    const getTechnicians = async () => {
+        try {
+            const result = await dispatch(fetchTechnicians()).unwrap();
+            return result;
+        } catch (err) {
+            console.error('Get technicians error:', err);
+            throw err;
+        }
+    }
+
+    // Error Handling
     const clearAuthError = () => {
-        dispatch(clearError())
+        dispatch(clearError());
     }
 
     return {
+        // Auth state
         user,
         token,
         loading,
         error,
         isAuthenticated,
 
+        // User management state
+        users,
+        technicians,
+        selectedUser,
+        userLoading,
+        userError,
+
+        // Authentication methods
         register,
         login,
         logout,
         googleLoginHandler,
         verifyAuthToken,
         fetchCurrentUser,
+
+        // User management methods
+        getAllUsers,
+        getUserById,
+        updateUser,
+        deleteUser,
+        getTechnicians,
+
+        // Utility methods
         clearAuthError
     }
 }

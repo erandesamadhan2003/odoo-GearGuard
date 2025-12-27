@@ -12,7 +12,7 @@ const initialState = {
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
     try {
         const response = await register(userData);
-        return response;
+        return response; 
     } catch (error) {
         return rejectWithValue(error.response?.data?.message || 'Registration failed');
     }

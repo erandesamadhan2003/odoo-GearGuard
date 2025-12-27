@@ -1,15 +1,15 @@
 import { User } from "../models/User.js";
 import jwt from "jsonwebtoken";
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, {
+const generateToken = (userId) => {
+    return jwt.sign({ id: userId, userId }, process.env.JWT_SECRET, {
         expiresIn: process.env.JWT_EXPIRE || '7d'
     });
 }
 
 export const register = async (req, res) => {
     try {
-        const { fullName, email, password } = req.body;
+        const { fullName, email, password, role } = req.body;
 
         if (!fullName || !email || !password) {
             return res.status(400).json({
@@ -26,25 +26,39 @@ export const register = async (req, res) => {
             });
         }
 
-        const user = await User.create({
+        // Allow role setting during registration only for testing (in development mode)
+        // In production, roles should be assigned by admins only
+        const userData = {
             fullName,
             email,
             password,
             authProvider: 'local'
-        });
+        };
 
-        const token = generateToken(user.id);
+        // Only allow role setting in development mode
+        if (role && process.env.NODE_ENV !== 'production') {
+            const allowedRoles = ['admin', 'manager', 'technician', 'user'];
+            if (allowedRoles.includes(role)) {
+                userData.role = role;
+            }
+        }
+
+        const user = await User.create(userData);
+
+        const token = generateToken(user.userId);
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
             token,
             user: {
-                id: user.id,
+                id: user.userId || user.id,
+                userId: user.userId,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                role: user.role
             }
         });
     } catch (error) {
@@ -93,14 +107,14 @@ export const login = async (req, res) => {
             });
         }
 
-        const token = generateToken(user.id);
+        const token = generateToken(user.userId);
 
         res.json({
             success: true,
             message: 'Login successful',
             token,
             user: {
-                id: user.id,
+                id: user.userId || user.id,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
@@ -118,7 +132,7 @@ export const login = async (req, res) => {
 };
 
 export const googleCallBack = async (req, res) => {
-    const token = generateToken(req.user.id);
+    const token = generateToken(req.user.userId || req.user.id);
 
     res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}&userId=${req.user.id}`);
 }
