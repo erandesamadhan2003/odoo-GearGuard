@@ -42,39 +42,32 @@ export const KanbanBoard = () => {
       getAllRequests();
       getAllTeams();
     } else if (isTechnician(user)) {
-      getAssignedRequests();
+      // Technicians can see and move ALL requests in the board
+      getAllRequests();
+      getAllTeams();
     } else if (isOperator(user)) {
       getMyRequests();
     }
   }, [user]);
 
   const handleDrop = async (requestId, newStage) => {
-    // Get requests based on role
-    const roleRequests = isAdminOrManager(user)
-      ? requests
-      : isTechnician(user)
-      ? assignedRequests
-      : myRequests;
+    // Get requests based on role - Technicians now see all requests like Admin/Manager
+    const roleRequests =
+      isAdminOrManager(user) || isTechnician(user) ? requests : myRequests;
 
     const request = roleRequests.find(
       (r) => (r.requestId || r.id) === requestId
     );
     if (request && request.stage !== newStage) {
-      // Check if user can update this request
-      if (isTechnician(user) && request.assignedToUserId !== user.userId) {
-        console.error("You can only update requests assigned to you");
-        return;
-      }
+      // Technicians can move ANY request, no restriction
 
       try {
         const id = request.requestId || request.id;
         const currentStage = request.stage || "new";
         await moveRequest(id, currentStage, newStage);
         // Refresh requests after move
-        if (isAdminOrManager(user)) {
+        if (isAdminOrManager(user) || isTechnician(user)) {
           await getAllRequests();
-        } else if (isTechnician(user)) {
-          await getAssignedRequests();
         } else {
           await getMyRequests();
         }
@@ -84,10 +77,9 @@ export const KanbanBoard = () => {
     }
   };
 
-  // Get requests based on role
+  // Get requests based on role - Technicians see all requests like Admin/Manager
   const getRoleBasedRequests = () => {
-    if (isAdminOrManager(user)) return requests;
-    if (isTechnician(user)) return assignedRequests;
+    if (isAdminOrManager(user) || isTechnician(user)) return requests;
     if (isOperator(user)) return myRequests;
     return [];
   };
@@ -128,8 +120,8 @@ export const KanbanBoard = () => {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      {/* Filters - Only for Admin/Manager */}
-      {isAdminOrManager(user) && (
+      {/* Filters - Admin/Manager/Technician can filter */}
+      {(isAdminOrManager(user) || isTechnician(user)) && (
         <Card className="mb-6">
           <div className="p-4">
             <div className="flex items-center gap-4">

@@ -325,7 +325,7 @@ export const RequestDetailPage = () => {
 
           {/* Request Details Table - Professional Grid Layout */}
           <Card className="border-0 shadow-lg">
-            <CardHeader className="border-b bg-gradient-to-r from-slate-50 to-blue-50">
+            <CardHeader className="border-b bg-linear-to-br from-slate-50 to-blue-50">
               <CardTitle className="text-xl">Request Information</CardTitle>
             </CardHeader>
             <CardContent className="p-0">

@@ -25,7 +25,7 @@ export default function KanbanPage() {
           {isOperator(user) && (
             <Button
               onClick={() => navigate("/requests/new")}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md"
+              className="bg-linear-to-br from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Request

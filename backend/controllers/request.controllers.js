@@ -254,7 +254,7 @@ export const updateRequestStage = async (req, res) => {
         if (stage === 'completed' || stage === 'repaired' || stage === 'scrapped' || stage === 'cancelled') {
             updateData.completedDate = new Date();
             if (!request.assignedToUserId) {
-                updateData.assignedToUserId = req.user.id;
+                updateData.assignedToUserId = req.user.userId || req.user.id;
             }
         }
 
@@ -276,7 +276,7 @@ export const updateRequestStage = async (req, res) => {
         // Create history entry
         await RequestHistory.create({
             requestId,
-            changedByUserId: req.user.id,
+            changedByUserId: req.user.userId || req.user.id,
             oldStage,
             newStage: stage,
             notes: notes || `Stage changed from ${oldStage} to ${stage}`,
