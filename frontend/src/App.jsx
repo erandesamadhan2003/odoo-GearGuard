@@ -23,6 +23,9 @@ import { AnalyticsPage } from "./pages/AnalyticsPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
 import { AuthCallBack } from "./pages/auth/AuthCallBack";
 import { useEffect, useState } from "react";
+import { UsersPage } from "./pages/UsersPage";
+import { CreateUserPage } from "./pages/users/CreateUserPage";
+import { EditUserPage } from "./pages/users/EditUserPage";
 
 const ProtectedRoute = ({ children }) => {
   const { token, isAuthenticated } = useSelector((state) => state.auth);
@@ -227,6 +230,30 @@ const Router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <AnalyticsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users",
+    element: (
+      <ProtectedRoute>
+        <UsersPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users/new",
+    element: (
+      <ProtectedRoute>
+        <CreateUserPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/users/:id/edit",
+    element: (
+      <ProtectedRoute>
+        <EditUserPage />
       </ProtectedRoute>
     ),
   },

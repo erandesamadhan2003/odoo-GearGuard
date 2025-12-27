@@ -170,3 +170,51 @@ export const getAllTechnicians = async (req, res) => {
         });
     }
 };
+
+// Create user
+export const createUser = async (req, res) => {
+    try {
+        const { fullName, email, password, role } = req.body;
+
+        // Only admin can create users
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: 'Only administrators can create users'
+            });
+        }
+
+        const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: 'User already exists with this email'
+            });
+        }
+
+        const user = await User.create({
+            fullName,
+            email,
+            password,
+            role: role || 'user',
+            authProvider: 'local'
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'User created successfully',
+            user: {
+                userId: user.userId,
+                fullName: user.fullName,
+                email: user.email,
+                role: user.role
+            }
+        });
+    } catch (error) {
+        console.error('Create user error:', error);
+        res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to create user'
+        });
+    }
+};

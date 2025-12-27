@@ -39,6 +39,12 @@ export const Sidebar = ({ collapsed }) => {
         roles: ["admin", "manager", "technician", "user"],
       },
       {
+        label: "Users",
+        icon: User,
+        path: "/users",
+        roles: ["admin"], // NEW - Admin only
+      },
+      {
         label: "Teams",
         icon: Users,
         path: "/teams",

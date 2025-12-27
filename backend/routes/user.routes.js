@@ -4,7 +4,8 @@ import {
     getUserById,
     updateUser,
     deleteUser,
-    getAllTechnicians
+    getAllTechnicians,
+    createUser
 } from '../controllers/user.controllers.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
 import { requireManager, requireAdmin } from '../middleware/roleAuth.middleware.js';
@@ -29,5 +30,8 @@ router.put('/:userId', validateId('userId'), updateUser);
 
 // Delete user (Admin only)
 router.delete('/:userId', requireAdmin, validateId('userId'), deleteUser);
+
+// Create user (Admin only)
+router.post('/', requireAdmin, createUser);
 
 export default router;
