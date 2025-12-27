@@ -7,6 +7,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { useSelector } from "react-redux";
 import { AuthCallBack } from "./pages/auth/AuthCallBack";
 import { useEffect, useState } from "react";
+import { Footer } from "./layouts/Footer";
 
 const ProtectedRoute = ({ children }) => {
   const { token, isAuthenticated } = useSelector((state) => state.auth);
@@ -78,20 +79,26 @@ const Router = createBrowserRouter([
     path: "/auth/callback",
     element: <AuthCallBack />,
   },
+  // {
+  //   path: "/dashboard",
+  //   element: (
+  //     <ProtectedRoute>
+  //       <Dashboard />
+  //     </ProtectedRoute>
+  //   ),
+  // },
   {
     path: "/dashboard",
-    element: (
-      <ProtectedRoute>
-        <Dashboard />
-      </ProtectedRoute>
-    ),
+    element: <Dashboard />,
   },
+
 ]);
 
 function App() {
   return (
     <>
       <RouterProvider router={Router} />
+      {/* <Footer /> */}
     </>
   );
 }
