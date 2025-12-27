@@ -8,8 +8,11 @@ export const getAllTeams = async (req, res) => {
                 {
                     model: User,
                     as: 'members',
-                    through: { attributes: ['isLead', 'joinedAt'] },
-                    attributes: ['id', 'fullName', 'email', 'role']
+                    through: { 
+                        attributes: ['isLead', 'joinedAt'],
+                        as: 'teamMember'
+                    },
+                    attributes: ['userId', 'fullName', 'email', 'role']
                 }
             ],
             order: [['teamName', 'ASC']]
@@ -38,8 +41,11 @@ export const getTeamById = async (req, res) => {
                 {
                     model: User,
                     as: 'members',
-                    through: { attributes: ['isLead', 'joinedAt'] },
-                    attributes: ['id', 'fullName', 'email', 'role']
+                    through: { 
+                        attributes: ['isLead', 'joinedAt'],
+                        as: 'teamMember'
+                    },
+                    attributes: ['userId', 'fullName', 'email', 'role']
                 }
             ]
         });
