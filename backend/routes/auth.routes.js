@@ -13,6 +13,7 @@ router.get('/google', passport.authenticate('google', {
 }));
 router.get('/google/callback', passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login`, session: false }), googleCallBack);
 router.get('/profile', authMiddleware, getProfile);
+router.get('/me', authMiddleware, getProfile); // Alias for /profile
 router.post('/logout', authMiddleware, logout);
 
 export default router;

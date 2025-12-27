@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: '30d'
+        expiresIn: process.env.JWT_EXPIRE || '7d'
     });
 }
 
@@ -18,7 +18,7 @@ export const register = async (req, res) => {
             });
         }
 
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ where: { email: email.toLowerCase() } });
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -33,14 +33,14 @@ export const register = async (req, res) => {
             authProvider: 'local'
         });
 
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
             token,
             user: {
-                id: user._id,
+                id: user.id,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
@@ -69,8 +69,8 @@ export const login = async (req, res) => {
             });
         }
 
-        // Check user exists
-        const user = await User.findOne({ email });
+        // Check user exists (lowercase email for comparison)
+        const user = await User.findOne({ where: { email: email.toLowerCase() } });
         if (!user) {
             return res.status(401).json({
                 success: false,
@@ -93,14 +93,14 @@ export const login = async (req, res) => {
             });
         }
 
-        const token = generateToken(user._id);
+        const token = generateToken(user.id);
 
         res.json({
             success: true,
             message: 'Login successful',
             token,
             user: {
-                id: user._id,
+                id: user.id,
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
@@ -118,9 +118,9 @@ export const login = async (req, res) => {
 };
 
 export const googleCallBack = async (req, res) => {
-    const token = generateToken(req.user._id);
+    const token = generateToken(req.user.id);
 
-    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}&userId=${req.user._id}`);
+    res.redirect(`${process.env.FRONTEND_URL}/auth/callback?token=${token}&userId=${req.user.id}`);
 }
 
 export const logout = async (req, res) => {
@@ -134,7 +134,7 @@ export const getProfile = async (req, res) => {
     return res.json({
         success: true,
         user: {
-            id: req.user._id,
+            id: req.user.id,
             fullName: req.user.fullName,
             email: req.user.email,
             authProvider: req.user.authProvider,
@@ -142,5 +142,3 @@ export const getProfile = async (req, res) => {
         }
     });
 }
-
-

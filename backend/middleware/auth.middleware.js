@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { User } from '../models/User.js';
+
 export const authMiddleware = async (req, res, next) => {
     try {
         let token;
@@ -17,14 +18,17 @@ export const authMiddleware = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        req.user = await User.findById(decoded.id).select('-password');
+        const user = await User.findByPk(decoded.id);
 
-        if(!req.user) {
+        if(!user) {
             return res.status(401).json({
                 success: false,
                 message: 'User not found, authorization denied'
             });
         }
+
+        // Remove password from user object
+        req.user = user.toJSON();
         
         next();
 
@@ -36,4 +40,3 @@ export const authMiddleware = async (req, res, next) => {
         });
     }
 }
-

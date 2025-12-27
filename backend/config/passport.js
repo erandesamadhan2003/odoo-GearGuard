@@ -2,29 +2,26 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { User } from "../models/User.js";
 
-export const configurePassport = () => {
+export const configurePassport = (passportInstance) => {
 
-    passport.use(
+    passportInstance.use(
         new GoogleStrategy({
             clientID: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            callbackURL: '/api/auth/google/callback'
+            callbackURL: process.env.GOOGLE_CALLBACK_URL || '/api/auth/google/callback'
         },
-
-            async (accessToken, refershToken, profile, done) => {
+            async (accessToken, refreshToken, profile, done) => {
                 try {
-                    let user = await User.findOne({ googleId: profile.id });
+                    let user = await User.findOne({ where: { googleId: profile.id } });
                     if (user) {
-                        console.log("Existing Google user found: ", user.email);
                         return done(null, user);
                     }
 
                     const existingEmailUser = await User.findOne({
-                        email: profile.emails[0].value
+                        where: { email: profile.emails[0].value.toLowerCase() }
                     });
 
                     if (existingEmailUser) {
-                        console.log('🔗 Linking Google account to existing user:', existingEmailUser.email);
                         existingEmailUser.googleId = profile.id;
                         existingEmailUser.authProvider = 'google';
                         existingEmailUser.profilePicture = profile.photos[0]?.value || '';
@@ -35,12 +32,11 @@ export const configurePassport = () => {
                     user = await User.create({
                         googleId: profile.id,
                         fullName: profile.displayName,
-                        email: profile.emails[0].value,
+                        email: profile.emails[0].value.toLowerCase(),
                         authProvider: 'google',
                         profilePicture: profile.photos[0]?.value || ''
                     });
 
-                    console.log("New Google user created: ", user.email);
                     done(null, user);
 
                 } catch (error) {
@@ -51,13 +47,13 @@ export const configurePassport = () => {
         )
     );
 
-    passport.serializeUser((user, done) => {
+    passportInstance.serializeUser((user, done) => {
         done(null, user.id);
     });
 
-    passport.deserializeUser(async (id, done) => {
+    passportInstance.deserializeUser(async (id, done) => {
         try {
-            const user = await User.findById(id);
+            const user = await User.findByPk(id);
             done(null, user);
         } catch (error) {
             done(error, null);
