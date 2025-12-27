@@ -15,6 +15,7 @@ pids/
 *.pid.lock
 
 scripts/
+temp/
 
 coverage/
 
