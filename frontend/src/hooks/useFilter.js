@@ -1,28 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useDebounce } from './useDebounce';
 
-/**
- * Filter hook for managing complex filtering logic
- * Supports search, multi-select filters, and pagination
- * 
- * @param {Object} initialFilters - Initial filter values
- * @param {Function} onFilterChange - Callback when filters change
- * @returns {Object} - Filter state and methods
- * 
- * @example
- * const {
- *   filters,
- *   searchTerm,
- *   setSearchTerm,
- *   updateFilter,
- *   clearFilters,
- *   activeFiltersCount
- * } = useFilter({
- *   departmentId: null,
- *   status: 'active',
- *   categoryId: null
- * });
- */
 export const useFilter = (initialFilters = {}, onFilterChange = null) => {
     const [filters, setFilters] = useState(initialFilters);
     const [searchTerm, setSearchTerm] = useState('');
