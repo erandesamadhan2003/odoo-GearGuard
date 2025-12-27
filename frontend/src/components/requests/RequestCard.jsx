@@ -15,7 +15,7 @@ export const RequestCard = ({ request }) => {
   const navigate = useNavigate();
   const [{ isDragging }, drag] = useDrag(() => ({
     type: "REQUEST",
-    item: { id: request.requestId },
+    item: { id: request.requestId || request.id },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -24,7 +24,7 @@ export const RequestCard = ({ request }) => {
   return (
     <div
       ref={drag}
-      onClick={() => navigate(`/requests/${request.requestId}`)}
+      onClick={() => navigate(`/requests/${request.requestId || request.id}`)}
       className={cn(
         "bg-white p-4 rounded-lg shadow-sm border border-slate-200 cursor-move transition-all hover:shadow-md",
         isDragging && "opacity-50",

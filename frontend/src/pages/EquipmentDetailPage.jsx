@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useEquipment } from "@/hooks/useEquipment";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/common/Card";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,8 @@ import { useState } from "react";
 export const EquipmentDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "manager";
   const {
     selectedEquipment,
     equipmentRequests,
@@ -55,7 +58,7 @@ export const EquipmentDetailPage = () => {
   }
 
   const openRequests = equipmentRequests.filter(
-    (r) => r.stage !== "repaired" && r.stage !== "scrapped"
+    (r) => r.stage !== "completed" && r.stage !== "cancelled" && r.stage !== "repaired" && r.stage !== "scrapped"
   );
 
   return (
@@ -162,11 +165,18 @@ export const EquipmentDetailPage = () => {
               </CardContent>
             </Card>
 
-            {/* Maintenance Requests */}
+            {/* Maintenance Requests - Smart Button */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <CardTitle>Maintenance Requests</CardTitle>
+                  <div className="flex items-center gap-3">
+                    <CardTitle>Maintenance</CardTitle>
+                    {openRequests.length > 0 && (
+                      <Badge variant="danger" className="text-sm px-2 py-1">
+                        {openRequests.length} Open
+                      </Badge>
+                    )}
+                  </div>
                   <Button
                     onClick={() => navigate(`/requests/new?equipmentId=${id}`)}
                     className="bg-blue-600 hover:bg-blue-700 text-white"

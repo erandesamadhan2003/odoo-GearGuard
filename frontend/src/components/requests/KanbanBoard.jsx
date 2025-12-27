@@ -12,8 +12,9 @@ import { useSearchParams } from "react-router";
 const stages = [
   { key: "new", label: "New" },
   { key: "in_progress", label: "In Progress" },
-  { key: "repaired", label: "Repaired" },
-  { key: "scrapped", label: "Scrapped" },
+  { key: "on_hold", label: "On Hold" },
+  { key: "completed", label: "Completed" },
+  { key: "cancelled", label: "Cancelled" },
 ];
 
 export const KanbanBoard = () => {
@@ -30,10 +31,14 @@ export const KanbanBoard = () => {
   }, []);
 
   const handleDrop = async (requestId, newStage) => {
-    const request = requests.find((r) => r.requestId === requestId);
+    const request = requests.find((r) => (r.requestId || r.id) === requestId);
     if (request && request.stage !== newStage) {
       try {
-        await moveRequest(requestId, request.stage, newStage);
+        const id = request.requestId || request.id;
+        const currentStage = request.stage || "new";
+        await moveRequest(id, currentStage, newStage);
+        // Refresh requests after move
+        await getAllRequests();
       } catch (error) {
         console.error("Failed to move request:", error);
       }
@@ -50,13 +55,17 @@ export const KanbanBoard = () => {
   const grouped = {
     new: [],
     in_progress: [],
-    repaired: [],
-    scrapped: [],
+    on_hold: [],
+    completed: [],
+    cancelled: [],
   };
 
   filteredRequests.forEach((r) => {
-    if (grouped[r.stage]) {
-      grouped[r.stage].push(r);
+    const stage = r.stage || "new";
+    if (grouped[stage]) {
+      grouped[stage].push(r);
+    } else {
+      grouped.new.push(r);
     }
   });
 
@@ -92,7 +101,7 @@ export const KanbanBoard = () => {
       </Card>
 
       {/* Kanban Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stages.map((stage) => (
           <KanbanColumn
             key={stage.key}

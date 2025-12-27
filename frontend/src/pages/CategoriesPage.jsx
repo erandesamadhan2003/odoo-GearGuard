@@ -1,18 +1,41 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useEquipment } from "@/hooks/useEquipment";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/common/Card";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Tags, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Modal } from "@/components/common/Modal";
 
 export const CategoriesPage = () => {
-  const { categories, loading, getAllCategories } = useEquipment();
+  const { user } = useAuth();
+  const { categories, loading, getAllCategories, createCategory } = useEquipment();
+  const isAdmin = user?.role === "admin" || user?.role === "manager";
+  const [showModal, setShowModal] = useState(false);
+  const [formData, setFormData] = useState({ categoryName: "", description: "" });
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     getAllCategories();
   }, []);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await createCategory(formData);
+      setShowModal(false);
+      setFormData({ categoryName: "", description: "" });
+      getAllCategories();
+    } catch (error) {
+      console.error("Create category error:", error);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -22,10 +45,15 @@ export const CategoriesPage = () => {
             <h1 className="text-3xl font-bold text-slate-900">Categories</h1>
             <p className="text-slate-600 mt-1">Manage equipment categories</p>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Category
-          </Button>
+          {isAdmin && (
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+              onClick={() => setShowModal(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Category
+            </Button>
+          )}
         </div>
 
         {loading ? (
@@ -59,6 +87,61 @@ export const CategoriesPage = () => {
             ))}
           </div>
         )}
+
+        {/* Create Category Modal */}
+        <Modal
+          isOpen={showModal}
+          onClose={() => {
+            setShowModal(false);
+            setFormData({ categoryName: "", description: "" });
+          }}
+          title="Create New Category"
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Category Name *
+              </label>
+              <Input
+                value={formData.categoryName}
+                onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
+                placeholder="Enter category name"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Description
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                placeholder="Enter category description"
+                rows={3}
+                className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowModal(false);
+                  setFormData({ categoryName: "", description: "" });
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                {submitting ? "Creating..." : "Create Category"}
+              </Button>
+            </div>
+          </form>
+        </Modal>
       </div>
     </DashboardLayout>
   );

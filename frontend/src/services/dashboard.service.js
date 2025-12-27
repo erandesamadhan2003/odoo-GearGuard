@@ -1,8 +1,8 @@
-import { api, DASHBOARD_URL } from "../api/api";
+import { dashboardApi, DASHBOARD_URL } from "../api/api";
 
 export const getDashboardStats = async () => {
     try {
-        const response = await api.get(DASHBOARD_URL.GET_STATS);
+        const response = await dashboardApi.get(DASHBOARD_URL.GET_STATS);
         return response.data;
     } catch (error) {
         console.error("Get dashboard stats error:", error);
@@ -12,7 +12,7 @@ export const getDashboardStats = async () => {
 
 export const getOverdueRequests = async () => {
     try {
-        const response = await api.get(DASHBOARD_URL.GET_OVERDUE);
+        const response = await dashboardApi.get(DASHBOARD_URL.GET_OVERDUE);
         return response.data;
     } catch (error) {
         console.error("Get overdue requests error:", error);
@@ -22,7 +22,7 @@ export const getOverdueRequests = async () => {
 
 export const getRequestsByTeam = async () => {
     try {
-        const response = await api.get(DASHBOARD_URL.REQUESTS_BY_TEAM);
+        const response = await dashboardApi.get(DASHBOARD_URL.REQUESTS_BY_TEAM);
         return response.data;
     } catch (error) {
         console.error("Get requests by team error:", error);
@@ -32,7 +32,7 @@ export const getRequestsByTeam = async () => {
 
 export const getRequestsByCategory = async () => {
     try {
-        const response = await api.get(DASHBOARD_URL.REQUESTS_BY_CATEGORY);
+        const response = await dashboardApi.get(DASHBOARD_URL.REQUESTS_BY_CATEGORY);
         return response.data;
     } catch (error) {
         console.error("Get requests by category error:", error);

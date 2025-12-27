@@ -228,7 +228,7 @@ export const updateRequestStage = async (req, res) => {
             });
         }
 
-        const validStages = ['new', 'in_progress', 'repaired', 'scrapped'];
+        const validStages = ['new', 'in_progress', 'on_hold', 'completed', 'cancelled', 'repaired', 'scrapped'];
         if (!validStages.includes(stage)) {
             return res.status(400).json({
                 success: false,
@@ -251,7 +251,7 @@ export const updateRequestStage = async (req, res) => {
         if (notes) updateData.notes = notes;
         if (durationHours) updateData.durationHours = durationHours;
         
-        if (stage === 'repaired' || stage === 'scrapped') {
+        if (stage === 'completed' || stage === 'repaired' || stage === 'scrapped' || stage === 'cancelled') {
             updateData.completedDate = new Date();
             if (!request.assignedToUserId) {
                 updateData.assignedToUserId = req.user.id;
@@ -259,6 +259,19 @@ export const updateRequestStage = async (req, res) => {
         }
 
         await request.update(updateData);
+
+        // Scrap Logic: If request is scrapped, mark equipment as scrapped
+        if (stage === 'scrapped' || stage === 'cancelled') {
+            const equipment = await Equipment.findByPk(request.equipmentId);
+            if (equipment) {
+                await equipment.update({ 
+                    status: 'scrapped',
+                    notes: equipment.notes 
+                        ? `${equipment.notes}\n[${new Date().toISOString()}] Equipment marked as scrapped due to request: ${request.subject}`
+                        : `[${new Date().toISOString()}] Equipment marked as scrapped due to request: ${request.subject}`
+                });
+            }
+        }
 
         // Create history entry
         await RequestHistory.create({

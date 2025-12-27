@@ -13,8 +13,36 @@ export const RequestForm = ({ equipmentId, initialData, onSuccess }) => {
   const { createRequest, updateRequest, loading } = useRequest();
   const { equipment, getAllEquipment } = useEquipment();
 
-  const [formData, setFormData] = useState(
-    initialData || {
+  const [formData, setFormData] = useState(() => {
+    if (initialData) {
+      // Handle nested objects from API response
+      const equipmentId = initialData.equipmentId || 
+                         initialData.equipment?.equipmentId || 
+                         equipmentId || "";
+      const categoryId = initialData.categoryId || 
+                        initialData.category?.categoryId || 
+                        initialData.equipment?.categoryId || "";
+      const maintenanceTeamId = initialData.maintenanceTeamId || 
+                               initialData.maintenanceTeam?.teamId || 
+                               initialData.equipment?.maintenanceTeamId || "";
+      const assignedToUserId = initialData.assignedToUserId || 
+                              initialData.assignedTo?.userId || "";
+
+      return {
+        subject: initialData.subject || "",
+        description: initialData.description || "",
+        equipmentId: equipmentId,
+        categoryId: categoryId,
+        maintenanceTeamId: maintenanceTeamId,
+        assignedToUserId: assignedToUserId,
+        priority: initialData.priority || "medium",
+        requestType: initialData.requestType || "corrective",
+        scheduledDate: initialData.scheduledDate 
+          ? new Date(initialData.scheduledDate).toISOString().slice(0, 16)
+          : "",
+      };
+    }
+    return {
       subject: "",
       description: "",
       equipmentId: equipmentId || "",
@@ -24,8 +52,8 @@ export const RequestForm = ({ equipmentId, initialData, onSuccess }) => {
       priority: "medium",
       requestType: "corrective",
       scheduledDate: "",
-    }
-  );
+    };
+  });
   const [errors, setErrors] = useState({});
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -87,7 +115,8 @@ export const RequestForm = ({ equipmentId, initialData, onSuccess }) => {
       };
 
       if (initialData) {
-        await updateRequest(initialData.requestId, payload);
+        const requestId = initialData.requestId || initialData.id;
+        await updateRequest(requestId, payload);
       } else {
         await createRequest(payload);
       }

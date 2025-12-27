@@ -70,12 +70,29 @@ npm run dev
 
 ## Features
 
-- User authentication (local + Google OAuth)
-- Role-based access (Admin, Manager, Technician, User)
-- Equipment management
-- Maintenance request tracking
-- Team and department management
-- Dashboard with statistics and reports
+### Core Functionality
+- ✅ User authentication (local + Google OAuth)
+- ✅ Role-based access control (Admin, Manager, Technician, User)
+- ✅ Equipment tracking by Department and Employee
+- ✅ Maintenance Teams with member management
+- ✅ Maintenance Requests (Corrective & Preventive)
+- ✅ Kanban Board with drag-and-drop functionality
+- ✅ Calendar View for scheduled maintenance
+- ✅ Analytics Dashboard with charts and reports
+- ✅ Smart buttons on Equipment form (shows request count)
+- ✅ Auto-scrap logic (marks equipment as scrapped when request is scrapped)
+
+### Role Permissions
+- **Admin/Manager**: Full access - Create/Edit/Delete equipment, teams, categories, departments
+- **Technician**: View assigned requests, update request stages
+- **User**: Create requests, view own requests
+
+### UI Features
+- Modern, responsive design with Tailwind CSS
+- Drag-and-drop Kanban board
+- Real-time updates
+- Professional request detail pages
+- Role-based UI visibility
 
 ## Database
 

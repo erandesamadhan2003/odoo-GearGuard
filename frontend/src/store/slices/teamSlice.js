@@ -137,7 +137,8 @@ const teamSlice = createSlice({
             .addCase(fetchTeamById.fulfilled, (state, action) => {
                 state.loading = false;
                 state.selectedTeam = action.payload.team;
-                state.teamMembers = action.payload.members || [];
+                // Members are nested in team.members from API response
+                state.teamMembers = action.payload.team?.members || action.payload.members || [];
             })
             .addCase(fetchTeamById.rejected, (state, action) => {
                 state.loading = false;

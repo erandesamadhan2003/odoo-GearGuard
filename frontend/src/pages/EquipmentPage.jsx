@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useEquipment } from "@/hooks/useEquipment";
 import { useDepartment } from "@/hooks/useDepartment";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/common/Card";
 import { Badge } from "@/components/common/Badge";
 import { SearchBar } from "@/components/common/SearchBar";
@@ -23,6 +24,7 @@ const getStatusVariant = (status) => {
 
 export const EquipmentPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const {
     equipment,
     equipmentLoading,
@@ -31,6 +33,7 @@ export const EquipmentPage = () => {
     categories,
   } = useEquipment();
   const { departments, getAllDepartments } = useDepartment();
+  const isAdmin = user?.role === "admin" || user?.role === "manager";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -65,13 +68,15 @@ export const EquipmentPage = () => {
               Manage and track all equipment
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/equipment/new")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Add Equipment
-          </Button>
+          {isAdmin && (
+            <Button
+              onClick={() => navigate("/equipment/new")}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Equipment
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
@@ -130,12 +135,14 @@ export const EquipmentPage = () => {
                 : "Get started by adding your first equipment"
             }
             action={
-              <Button
-                onClick={() => navigate("/equipment/new")}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Add Equipment
-              </Button>
+              isAdmin && (
+                <Button
+                  onClick={() => navigate("/equipment/new")}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  Add Equipment
+                </Button>
+              )
             }
           />
         ) : (

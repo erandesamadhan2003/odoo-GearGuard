@@ -19,7 +19,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { BarChart3, TrendingUp, Users, Wrench } from "lucide-react";
-import { api, DASHBOARD_URL } from "@/api/api";
+import { dashboardApi, DASHBOARD_URL } from "@/api/api";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
@@ -38,22 +38,34 @@ export const AnalyticsPage = () => {
   const [loadingTimeSeries, setLoadingTimeSeries] = useState(false);
 
   useEffect(() => {
-    getDashboardStats();
-    getRequestsByTeam();
-    getRequestsByCategory();
-    fetchRequestsOverTime();
-    fetchTechnicianPerformance();
+    const loadData = async () => {
+      try {
+        await Promise.all([
+          getDashboardStats(),
+          getRequestsByTeam(),
+          getRequestsByCategory(),
+        ]);
+        fetchRequestsOverTime();
+        fetchTechnicianPerformance();
+      } catch (error) {
+        console.error("Error loading analytics data:", error);
+        // Errors are handled individually in each function
+      }
+    };
+    loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchRequestsOverTime = async () => {
     try {
       setLoadingTimeSeries(true);
-      const response = await api.get(DASHBOARD_URL.REQUESTS_OVER_TIME, {
+      const response = await dashboardApi.get(DASHBOARD_URL.REQUESTS_OVER_TIME, {
         params: { days: 30 },
       });
       setRequestsOverTime(response.data.data || []);
     } catch (error) {
       console.error("Fetch requests over time error:", error);
+      setRequestsOverTime([]); // Set empty array on error
     } finally {
       setLoadingTimeSeries(false);
     }
@@ -61,10 +73,11 @@ export const AnalyticsPage = () => {
 
   const fetchTechnicianPerformance = async () => {
     try {
-      const response = await api.get(DASHBOARD_URL.TECHNICIAN_PERFORMANCE);
+      const response = await dashboardApi.get(DASHBOARD_URL.TECHNICIAN_PERFORMANCE);
       setTechnicianPerformance(response.data.data || []);
     } catch (error) {
       console.error("Fetch technician performance error:", error);
+      setTechnicianPerformance([]); // Set empty array on error
     }
   };
 
@@ -168,7 +181,7 @@ export const AnalyticsPage = () => {
                 <div className="flex items-center justify-center h-64">
                   <LoadingSpinner />
                 </div>
-              ) : (
+              ) : requestsOverTime && requestsOverTime.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart data={requestsOverTime}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -196,6 +209,10 @@ export const AnalyticsPage = () => {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-64 text-slate-500">
+                  <p>No data available</p>
+                </div>
               )}
             </CardContent>
           </Card>
@@ -249,7 +266,7 @@ export const AnalyticsPage = () => {
                 <div className="flex items-center justify-center h-64">
                   <LoadingSpinner />
                 </div>
-              ) : (
+              ) : requestsByTeam && requestsByTeam.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={requestsByTeam}>
                     <CartesianGrid strokeDasharray="3 3" />
@@ -260,6 +277,10 @@ export const AnalyticsPage = () => {
                     <Bar dataKey="count" fill="#3b82f6" name="Requests" />
                   </BarChart>
                 </ResponsiveContainer>
+              ) : (
+                <div className="flex items-center justify-center h-64 text-slate-500">
+                  <p>No data available</p>
+                </div>
               )}
             </CardContent>
           </Card>

@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/common/Ca
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { ArrowLeft, Edit, User, Calendar, Clock, FileText } from "lucide-react";
+import { ArrowLeft, Edit, User, Calendar, Clock, FileText, StickyNote } from "lucide-react";
 import moment from "moment";
 
 export const RequestDetailPage = () => {
@@ -51,61 +51,83 @@ export const RequestDetailPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6 max-w-6xl">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/requests")}
-              className="p-2"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Button>
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900">
-                {selectedRequest.subject}
-              </h1>
-              <div className="flex items-center gap-3 mt-2">
-                <Badge variant={getPriorityVariant(selectedRequest.priority)}>
-                  {selectedRequest.priority}
-                </Badge>
-                <Badge variant={getStageVariant(selectedRequest.stage)}>
-                  {selectedRequest.stage}
-                </Badge>
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4 flex-1">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/requests")}
+                className="p-2 hover:bg-slate-100"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-slate-900 mb-3">
+                  {selectedRequest.subject}
+                </h1>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <Badge 
+                    variant={getPriorityVariant(selectedRequest.priority)}
+                    className="text-sm px-3 py-1"
+                  >
+                    {selectedRequest.priority?.toUpperCase()}
+                  </Badge>
+                  <Badge 
+                    variant={getStageVariant(selectedRequest.stage)}
+                    className="text-sm px-3 py-1 capitalize"
+                  >
+                    {selectedRequest.stage?.replace("_", " ")}
+                  </Badge>
+                  {selectedRequest.requestType && (
+                    <Badge className="text-sm px-3 py-1 capitalize">
+                      {selectedRequest.requestType}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
+            {isAdmin && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/requests/${id}/edit`)}
+                className="ml-4"
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            )}
           </div>
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/requests/${id}/edit`)}
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Description</CardTitle>
+            <Card className="shadow-sm">
+              <CardHeader className="border-b border-slate-200">
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Description
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <p className="text-slate-700 whitespace-pre-wrap">
+              <CardContent className="pt-6">
+                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
                   {selectedRequest.description || "No description provided"}
                 </p>
               </CardContent>
             </Card>
 
             {selectedRequest.notes && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notes</CardTitle>
+              <Card className="shadow-sm">
+                <CardHeader className="border-b border-slate-200">
+                  <CardTitle className="flex items-center gap-2">
+                    <StickyNote className="w-5 h-5" />
+                    Notes
+                  </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-slate-700 whitespace-pre-wrap">
+                <CardContent className="pt-6">
+                  <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
                     {selectedRequest.notes}
                   </p>
                 </CardContent>
@@ -115,70 +137,76 @@ export const RequestDetailPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
+            <Card className="shadow-sm sticky top-6">
+              <CardHeader className="border-b border-slate-200">
+                <CardTitle>Request Details</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="pt-6 space-y-5">
                 {selectedRequest.equipment && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Equipment</p>
-                    <p className="font-medium">{selectedRequest.equipment.equipmentName}</p>
-                    <p className="text-sm text-slate-500">{selectedRequest.equipment.serialNumber}</p>
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Equipment</p>
+                    <p className="font-semibold text-slate-900">{selectedRequest.equipment.equipmentName}</p>
+                    <p className="text-sm text-slate-500 mt-1">{selectedRequest.equipment.serialNumber}</p>
                   </div>
                 )}
 
                 {selectedRequest.category && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Category</p>
-                    <p className="font-medium">{selectedRequest.category.categoryName}</p>
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Category</p>
+                    <p className="font-semibold text-slate-900">{selectedRequest.category.categoryName}</p>
                   </div>
                 )}
 
                 {selectedRequest.maintenanceTeam && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Team</p>
-                    <p className="font-medium">{selectedRequest.maintenanceTeam.teamName}</p>
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Team</p>
+                    <p className="font-semibold text-slate-900">{selectedRequest.maintenanceTeam.teamName}</p>
                   </div>
                 )}
 
                 {selectedRequest.scheduledDate && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1 flex items-center gap-2">
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
                       <Calendar className="w-4 h-4" />
                       Scheduled Date
                     </p>
-                    <p className="font-medium">
+                    <p className="font-semibold text-slate-900">
                       {moment(selectedRequest.scheduledDate).format("MMM D, YYYY")}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {moment(selectedRequest.scheduledDate).format("h:mm A")}
                     </p>
                   </div>
                 )}
 
                 {selectedRequest.assignedTo && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1 flex items-center gap-2">
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
                       <User className="w-4 h-4" />
                       Assigned To
                     </p>
-                    <p className="font-medium">{selectedRequest.assignedTo.fullName}</p>
-                    <p className="text-sm text-slate-500">{selectedRequest.assignedTo.email}</p>
+                    <p className="font-semibold text-slate-900">{selectedRequest.assignedTo.fullName}</p>
+                    <p className="text-sm text-slate-500 mt-1">{selectedRequest.assignedTo.email}</p>
                   </div>
                 )}
 
                 {selectedRequest.createdBy && (
-                  <div>
-                    <p className="text-sm text-slate-600 mb-1">Created By</p>
-                    <p className="font-medium">{selectedRequest.createdBy.fullName}</p>
+                  <div className="pb-4 border-b border-slate-100">
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Created By</p>
+                    <p className="font-semibold text-slate-900">{selectedRequest.createdBy.fullName}</p>
                   </div>
                 )}
 
                 <div>
-                  <p className="text-sm text-slate-600 mb-1 flex items-center gap-2">
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
                     <Clock className="w-4 h-4" />
                     Created
                   </p>
-                  <p className="font-medium">
+                  <p className="font-semibold text-slate-900">
                     {moment(selectedRequest.createdAt).format("MMM D, YYYY")}
+                  </p>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {moment(selectedRequest.createdAt).format("h:mm A")}
                   </p>
                 </div>
               </CardContent>

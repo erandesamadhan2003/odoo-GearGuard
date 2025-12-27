@@ -104,8 +104,8 @@ export const Topbar = ({ toggleSidebar }) => {
             Cancel
           </Button>
           <Button
-            variant="destructive"
             onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             Logout
           </Button>

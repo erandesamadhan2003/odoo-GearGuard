@@ -15,6 +15,7 @@ import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
 import { CreateEquipmentPage } from "./pages/CreateEquipmentPage";
 import { EditEquipmentPage } from "./pages/EditEquipmentPage";
 import { TeamsPage } from "./pages/TeamsPage";
+import { TeamDetailPage } from "./pages/TeamDetailPage";
 import { CategoriesPage } from "./pages/CategoriesPage";
 import { DepartmentsPage } from "./pages/DepartmentsPage";
 import { CalendarPage } from "./pages/CalendarPage";
@@ -186,6 +187,14 @@ const Router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <TeamsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/teams/:id",
+    element: (
+      <ProtectedRoute>
+        <TeamDetailPage />
       </ProtectedRoute>
     ),
   },

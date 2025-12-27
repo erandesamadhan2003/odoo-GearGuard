@@ -6,8 +6,9 @@ import { cn } from "@/lib/utils";
 const stageColors = {
   new: "bg-blue-50 border-blue-200",
   in_progress: "bg-yellow-50 border-yellow-200",
-  repaired: "bg-green-50 border-green-200",
-  scrapped: "bg-red-50 border-red-200",
+  on_hold: "bg-orange-50 border-orange-200",
+  completed: "bg-green-50 border-green-200",
+  cancelled: "bg-red-50 border-red-200",
 };
 
 export const KanbanColumn = ({ stage, label, items = [], onDrop }) => {
@@ -32,7 +33,13 @@ export const KanbanColumn = ({ stage, label, items = [], onDrop }) => {
         <h3 className="font-semibold text-slate-900 capitalize">
           {label || stage.replace("_", " ")}
         </h3>
-        <Badge variant={stage === "new" ? "info" : stage === "in_progress" ? "warning" : stage === "repaired" ? "success" : "danger"}>
+        <Badge variant={
+          stage === "new" ? "info" : 
+          stage === "in_progress" ? "warning" : 
+          stage === "completed" ? "success" : 
+          stage === "cancelled" ? "danger" : 
+          "default"
+        }>
           {items.length}
         </Badge>
       </div>
@@ -44,7 +51,7 @@ export const KanbanColumn = ({ stage, label, items = [], onDrop }) => {
           </div>
         ) : (
           items.map((req) => (
-            <RequestCard key={req.requestId} request={req} />
+            <RequestCard key={req.requestId || req.id} request={req} />
           ))
         )}
       </div>

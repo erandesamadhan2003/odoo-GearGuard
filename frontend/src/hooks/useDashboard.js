@@ -28,7 +28,8 @@ export const useDashboard = () => {
             return result;
         } catch (err) {
             console.error('Get dashboard stats error:', err);
-            throw err;
+            // Don't throw, just log the error to prevent uncaught promise rejection
+            return null;
         }
     };
 
@@ -48,7 +49,7 @@ export const useDashboard = () => {
             return result;
         } catch (err) {
             console.error('Get requests by team error:', err);
-            throw err;
+            return null;
         }
     };
 
@@ -58,7 +59,7 @@ export const useDashboard = () => {
             return result;
         } catch (err) {
             console.error('Get requests by category error:', err);
-            throw err;
+            return null;
         }
     };
 
