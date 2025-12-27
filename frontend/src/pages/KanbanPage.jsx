@@ -22,17 +22,44 @@ export default function KanbanPage() {
               Drag and drop requests to update their status
             </p>
           </div>
-          {/* Show "New Request" button for operators */}
           {isOperator(user) && (
             <Button
               onClick={() => navigate("/requests/new")}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-md"
             >
               <Plus className="w-4 h-4 mr-2" />
               New Request
             </Button>
           )}
         </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-4 px-4 py-3 bg-white rounded-lg border border-slate-200 flex-wrap">
+          <span className="text-sm font-medium text-slate-600">
+            Column Colors:
+          </span>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+            <span className="text-xs text-slate-600">New</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+            <span className="text-xs text-slate-600">In Progress</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+            <span className="text-xs text-slate-600">On Hold</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+            <span className="text-xs text-slate-600">Completed</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <span className="text-xs text-slate-600">Cancelled</span>
+          </div>
+        </div>
+
         <KanbanBoard />
       </div>
     </DashboardLayout>

@@ -22,15 +22,15 @@ const stages = [
 export const KanbanBoard = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const { 
-    requests, 
+  const {
+    requests,
     assignedRequests,
     myRequests,
-    loading, 
-    getAllRequests, 
+    loading,
+    getAllRequests,
     getAssignedRequests,
     getMyRequests,
-    moveRequest 
+    moveRequest,
   } = useRequest();
   const { teams, getAllTeams } = useTeams();
   const [selectedTeam, setSelectedTeam] = useState(
@@ -50,20 +50,22 @@ export const KanbanBoard = () => {
 
   const handleDrop = async (requestId, newStage) => {
     // Get requests based on role
-    const roleRequests = isAdminOrManager(user) 
-      ? requests 
-      : isTechnician(user) 
-      ? assignedRequests 
+    const roleRequests = isAdminOrManager(user)
+      ? requests
+      : isTechnician(user)
+      ? assignedRequests
       : myRequests;
-    
-    const request = roleRequests.find((r) => (r.requestId || r.id) === requestId);
+
+    const request = roleRequests.find(
+      (r) => (r.requestId || r.id) === requestId
+    );
     if (request && request.stage !== newStage) {
       // Check if user can update this request
       if (isTechnician(user) && request.assignedToUserId !== user.userId) {
         console.error("You can only update requests assigned to you");
         return;
       }
-      
+
       try {
         const id = request.requestId || request.id;
         const currentStage = request.stage || "new";
@@ -131,7 +133,9 @@ export const KanbanBoard = () => {
         <Card className="mb-6">
           <div className="p-4">
             <div className="flex items-center gap-4">
-              <label className="text-sm font-medium text-slate-700">Filter by Team:</label>
+              <label className="text-sm font-medium text-slate-700">
+                Filter by Team:
+              </label>
               <Select
                 value={selectedTeam}
                 onChange={setSelectedTeam}
@@ -149,8 +153,11 @@ export const KanbanBoard = () => {
         </Card>
       )}
 
-      {/* Kanban Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {/* Kanban Columns - Fixed Height Grid */}
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4"
+        style={{ height: "calc(100vh - 280px)" }} // Fixed height for consistent columns
+      >
         {stages.map((stage) => (
           <KanbanColumn
             key={stage.key}

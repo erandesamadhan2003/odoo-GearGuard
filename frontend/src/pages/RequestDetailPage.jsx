@@ -289,199 +289,212 @@ export const RequestDetailPage = () => {
           </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Description */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="border-b bg-slate-50">
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-blue-600" />
-                  Description
+        {/* Main Content */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Description */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="border-b bg-slate-50">
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                Description
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-8">
+              <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
+                {selectedRequest.description || "No description provided"}
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          {selectedRequest.notes && (
+            <Card className="border-0 shadow-lg bg-amber-50 border-amber-200">
+              <CardHeader className="border-b border-amber-200 bg-amber-100">
+                <CardTitle className="flex items-center gap-2 text-amber-900">
+                  <AlertCircle className="w-5 h-5" />
+                  Important Notes
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8">
-                <p className="text-slate-700 text-lg leading-relaxed whitespace-pre-wrap">
-                  {selectedRequest.description || "No description provided"}
+                <p className="text-amber-900 text-lg leading-relaxed whitespace-pre-wrap">
+                  {selectedRequest.notes}
                 </p>
               </CardContent>
             </Card>
+          )}
 
-            {/* Notes */}
-            {selectedRequest.notes && (
-              <Card className="border-0 shadow-lg bg-amber-50 border-amber-200">
-                <CardHeader className="border-b border-amber-200 bg-amber-100">
-                  <CardTitle className="flex items-center gap-2 text-amber-900">
-                    <AlertCircle className="w-5 h-5" />
-                    Important Notes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-8">
-                  <p className="text-amber-900 text-lg leading-relaxed whitespace-pre-wrap">
-                    {selectedRequest.notes}
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Equipment Info */}
-            {selectedRequest.equipment && (
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center">
-                      <Wrench className="w-6 h-6 text-blue-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          {/* Request Details Table - Professional Grid Layout */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="border-b bg-gradient-to-r from-slate-50 to-blue-50">
+              <CardTitle className="text-xl">Request Information</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-slate-200">
+                {/* Equipment Row */}
+                {selectedRequest.equipment && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <Wrench className="w-5 h-5 text-blue-600" />
+                      <span className="font-semibold text-slate-700">
                         Equipment
-                      </p>
-                      <p className="text-lg font-bold text-slate-900">
-                        {selectedRequest.equipment.equipmentName}
-                      </p>
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6 flex items-center justify-between">
+                      <div>
+                        <p className="font-semibold text-slate-900 text-lg">
+                          {selectedRequest.equipment.equipmentName}
+                        </p>
+                        <p className="text-sm text-slate-500 font-mono mt-1">
+                          SN: {selectedRequest.equipment.serialNumber}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-600">Serial Number</p>
-                    <p className="font-mono text-slate-900 font-semibold">
-                      {selectedRequest.equipment.serialNumber}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Category */}
-            {selectedRequest.category && (
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center">
-                      <Tags className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {/* Category Row */}
+                {selectedRequest.category && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <Tags className="w-5 h-5 text-purple-600" />
+                      <span className="font-semibold text-slate-700">
                         Category
-                      </p>
-                      <p className="text-lg font-bold text-slate-900">
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6 flex items-center">
+                      <p className="font-semibold text-slate-900 text-lg">
                         {selectedRequest.category.categoryName}
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Team */}
-            {selectedRequest.maintenanceTeam && (
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
-                      <Users className="w-6 h-6 text-green-600" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                {/* Team Row */}
+                {selectedRequest.maintenanceTeam && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <Users className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold text-slate-700">
                         Maintenance Team
-                      </p>
-                      <p className="text-lg font-bold text-slate-900">
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6 flex items-center">
+                      <p className="font-semibold text-slate-900 text-lg">
                         {selectedRequest.maintenanceTeam.teamName}
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Assigned To */}
-            {selectedRequest.assignedTo && (
-              <Card className="border-0 shadow-lg">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
-                      {selectedRequest.assignedTo.fullName.charAt(0)}
+                {/* Scheduled Date Row */}
+                {selectedRequest.scheduledDate && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-orange-600" />
+                      <span className="font-semibold text-slate-700">
+                        Scheduled Date
+                      </span>
                     </div>
-                    <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <div className="col-span-2 p-6">
+                      <p className="font-semibold text-slate-900 text-lg">
+                        {moment(selectedRequest.scheduledDate).format(
+                          "MMMM D, YYYY"
+                        )}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {moment(selectedRequest.scheduledDate).format("h:mm A")}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Assigned To Row */}
+                {selectedRequest.assignedTo && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <User className="w-5 h-5 text-indigo-600" />
+                      <span className="font-semibold text-slate-700">
                         Assigned To
-                      </p>
-                      <p className="font-bold text-slate-900">
-                        {selectedRequest.assignedTo.fullName}
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                          {selectedRequest.assignedTo.fullName.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900 text-lg">
+                            {selectedRequest.assignedTo.fullName}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            {selectedRequest.assignedTo.email}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Created By Row */}
+                {selectedRequest.createdBy && (
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <User className="w-5 h-5 text-slate-600" />
+                      <span className="font-semibold text-slate-700">
+                        Created By
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6 flex items-center">
+                      <p className="font-semibold text-slate-900 text-lg">
+                        {selectedRequest.createdBy.fullName}
                       </p>
                     </div>
                   </div>
-                  <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-600">
-                      {selectedRequest.assignedTo.email}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
 
-            {/* Timeline */}
-            <Card className="border-0 shadow-lg">
-              <CardHeader className="border-b bg-slate-50">
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-600" />
-                  Timeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                  <Calendar className="w-5 h-5 text-slate-400" />
-                  <div>
-                    <p className="text-xs text-slate-500">Created</p>
-                    <p className="font-semibold text-slate-900">
-                      {moment(selectedRequest.createdAt).format(
-                        "MMM D, YYYY h:mm A"
-                      )}
+                {/* Created Date Row */}
+                <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                  <div className="p-6 bg-slate-50 flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-slate-600" />
+                    <span className="font-semibold text-slate-700">
+                      Created On
+                    </span>
+                  </div>
+                  <div className="col-span-2 p-6">
+                    <p className="font-semibold text-slate-900 text-lg">
+                      {moment(selectedRequest.createdAt).format("MMMM D, YYYY")}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {moment(selectedRequest.createdAt).format("h:mm A")} •{" "}
+                      {moment(selectedRequest.createdAt).fromNow()}
                     </p>
                   </div>
                 </div>
 
-                {selectedRequest.scheduledDate && (
-                  <div className="flex items-center gap-3">
-                    <Calendar className="w-5 h-5 text-slate-400" />
-                    <div>
-                      <p className="text-xs text-slate-500">Scheduled</p>
-                      <p className="font-semibold text-slate-900">
-                        {moment(selectedRequest.scheduledDate).format(
-                          "MMM D, YYYY h:mm A"
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
+                {/* Completed Date Row */}
                 {selectedRequest.completedDate && (
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-500" />
-                    <div>
-                      <p className="text-xs text-slate-500">Completed</p>
-                      <p className="font-semibold text-slate-900">
+                  <div className="grid grid-cols-3 hover:bg-slate-50 transition-colors">
+                    <div className="p-6 bg-slate-50 flex items-center gap-3">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <span className="font-semibold text-slate-700">
+                        Completed On
+                      </span>
+                    </div>
+                    <div className="col-span-2 p-6">
+                      <p className="font-semibold text-slate-900 text-lg">
                         {moment(selectedRequest.completedDate).format(
-                          "MMM D, YYYY h:mm A"
+                          "MMMM D, YYYY"
                         )}
+                      </p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {moment(selectedRequest.completedDate).format("h:mm A")}
                       </p>
                     </div>
                   </div>
                 )}
-
-                {selectedRequest.createdBy && (
-                  <div className="pt-4 border-t">
-                    <p className="text-xs text-slate-500 mb-2">Created by</p>
-                    <p className="font-semibold text-slate-900">
-                      {selectedRequest.createdBy.fullName}
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>
