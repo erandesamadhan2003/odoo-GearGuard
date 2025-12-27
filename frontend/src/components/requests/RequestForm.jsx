@@ -1,216 +1,269 @@
-import { useState } from "react";
-import { FaTools, FaUserCog } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { useRequest } from "@/hooks/useRequest";
+import { useEquipment } from "@/hooks/useEquipment";
+import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select } from "@/components/common/Select";
+import { Card, CardContent } from "@/components/common/Card";
+import { Save } from "lucide-react";
 
-const mockEquipment = [
-    {
-        equipment_id: 1,
-        equipment_name: "Office AC",
-        category_id: 1,
-        maintenance_team_id: 2,
-        maintenance_team_name: "Mechanical Team",
-        default_technician_id: 5,
-        technician_name: "Rahul",
-    },
-    {
-        equipment_id: 2,
-        equipment_name: "Printer",
-        category_id: 2,
-        maintenance_team_id: 3,
-        maintenance_team_name: "IT Support",
-        default_technician_id: 6,
-        technician_name: "Anita",
-    },
-];
+export const RequestForm = ({ equipmentId, initialData, onSuccess }) => {
+  const navigate = useNavigate();
+  const { createRequest, updateRequest, loading } = useRequest();
+  const { equipment, getAllEquipment } = useEquipment();
 
-export const RequestForm = ({initialData}) => {
-    const [search, setSearch] = useState("");
-    const [form, setForm] = useState(
-        initialData || {
-            subject: "",
-            description: "",
-            equipmentId: "",
-            categoryId: null,
-            maintenanceTeamId: null,
-            assignedToUserId: null,
-            priority: "medium",
-            requestType: "corrective",
-            scheduledDate: "",
-            durationHours: "",
-        }
-    );
+  const [formData, setFormData] = useState(
+    initialData || {
+      subject: "",
+      description: "",
+      equipmentId: equipmentId || "",
+      categoryId: "",
+      maintenanceTeamId: "",
+      assignedToUserId: "",
+      priority: "medium",
+      requestType: "corrective",
+      scheduledDate: "",
+    }
+  );
+  const [errors, setErrors] = useState({});
+  const [searchTerm, setSearchTerm] = useState("");
 
-    // 🔹 Auto-fill logic when equipment selected
-    const handleEquipmentChange = (id) => {
-        const eq = mockEquipment.find(e => e.equipment_id === Number(id));
+  useEffect(() => {
+    getAllEquipment();
+  }, []);
 
-        setForm(prev => ({
-            ...prev,
-            equipmentId: id,
-            categoryId: eq?.category_id,
-            maintenanceTeamId: eq?.maintenance_team_id,
-            assignedToUserId: eq?.default_technician_id,
-            technicianName: eq?.technician_name,
-            teamName: eq?.maintenance_team_name,
-        }));
-    };
+  useEffect(() => {
+    if (equipmentId && equipment.length > 0) {
+      const selectedEquipment = equipment.find((eq) => eq.equipmentId === parseInt(equipmentId));
+      if (selectedEquipment) {
+        handleEquipmentChange(selectedEquipment.equipmentId);
+      }
+    }
+  }, [equipmentId, equipment]);
 
-    const filteredEquipment = mockEquipment.filter(eq =>
-        eq.equipment_name.toLowerCase().includes(search.toLowerCase())
-    );
+  const handleEquipmentChange = (id) => {
+    const eq = equipment.find((e) => e.equipmentId === parseInt(id));
+    if (eq) {
+      setFormData((prev) => ({
+        ...prev,
+        equipmentId: id,
+        categoryId: eq.categoryId || "",
+        maintenanceTeamId: eq.maintenanceTeamId || "",
+        assignedToUserId: eq.assignedToUserId || "",
+      }));
+    }
+  };
 
-    const submit = (e) => {
-        e.preventDefault();
-        console.log("FINAL REQUEST DATA:", form);
-        alert("Request submitted (mock)");
-    };
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
+  };
 
-    return (
-        <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold mb-4">
-                Create Maintenance Request
-            </h2>
+  const validate = () => {
+    const newErrors = {};
+    if (!formData.subject) newErrors.subject = "Required";
+    if (!formData.equipmentId) newErrors.equipmentId = "Required";
+    if (!formData.priority) newErrors.priority = "Required";
+    if (!formData.requestType) newErrors.requestType = "Required";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-            <form onSubmit={submit} className="space-y-5">
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!validate()) return;
 
-                {/* Subject */}
-                <div>
-                    <label className="text-sm font-medium">Subject</label>
-                    <input
-                        className="input mt-1"
-                        placeholder="Enter issue title"
-                        value={form.subject}
-                        onChange={e => setForm({ ...form, subject: e.target.value })}
-                    />
-                </div>
+    try {
+      const payload = {
+        ...formData,
+        equipmentId: parseInt(formData.equipmentId),
+        categoryId: formData.categoryId ? parseInt(formData.categoryId) : null,
+        maintenanceTeamId: formData.maintenanceTeamId ? parseInt(formData.maintenanceTeamId) : null,
+        assignedToUserId: formData.assignedToUserId ? parseInt(formData.assignedToUserId) : null,
+        scheduledDate: formData.scheduledDate || null,
+      };
 
-                {/* Description */}
-                <div>
-                    <label className="text-sm font-medium">Description</label>
-                    <textarea
-                        className="input mt-1 min-h-[90px]"
-                        placeholder="Describe the issue..."
-                        value={form.description}
-                        onChange={e => setForm({ ...form, description: e.target.value })}
-                    />
-                </div>
+      if (initialData) {
+        await updateRequest(initialData.requestId, payload);
+      } else {
+        await createRequest(payload);
+      }
 
-                {/* Equipment Search */}
-                <div>
-                    <label className="text-sm font-medium">Equipment</label>
-                    <input
-                        className="input mt-1"
-                        placeholder="Search equipment..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate("/requests");
+      }
+    } catch (error) {
+      console.error("Submit failed:", error);
+    }
+  };
 
-                    <select
-                        className="input mt-2"
-                        value={form.equipmentId}
-                        onChange={(e) => handleEquipmentChange(e.target.value)}
-                    >
-                        <option value="">Select Equipment</option>
-                        {filteredEquipment.map(eq => (
-                            <option key={eq.equipment_id} value={eq.equipment_id}>
-                                {eq.equipment_name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+  const filteredEquipment = equipment.filter((eq) =>
+    eq.equipmentName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    eq.serialNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
-                {/* Auto-filled info */}
-                {(form.teamName || form.technicianName) && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-3 rounded">
-                        <div className="flex items-center gap-2 text-sm">
-                            <FaTools className="text-gray-600" />
-                            <span>
-                                <strong>Team:</strong>{" "}
-                                {form.teamName || "Not Assigned"}
-                            </span>
-                        </div>
+  const selectedEquipment = equipment.find(
+    (eq) => eq.equipmentId === parseInt(formData.equipmentId)
+  );
 
-                        <div className="flex items-center gap-2 text-sm">
-                            <FaUserCog className="text-gray-600" />
-                            <span>
-                                <strong>Technician:</strong>{" "}
-                                {form.technicianName || "Not Assigned"}
-                            </span>
-                        </div>
-                    </div>
-                )}
+  return (
+    <Card>
+      <CardContent className="p-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Subject */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Subject *
+            </label>
+            <Input
+              value={formData.subject}
+              onChange={(e) => handleChange("subject", e.target.value)}
+              placeholder="Enter issue title"
+              className={errors.subject ? "border-red-500" : ""}
+            />
+            {errors.subject && (
+              <p className="text-sm text-red-600 mt-1">{errors.subject}</p>
+            )}
+          </div>
 
-                {/* Priority & Type */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-medium">Priority</label>
-                        <select
-                            className="input mt-1"
-                            value={form.priority}
-                            onChange={(e) =>
-                                setForm({ ...form, priority: e.target.value })
-                            }
-                        >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                            <option value="urgent">Urgent</option>
-                        </select>
-                    </div>
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Description
+            </label>
+            <textarea
+              value={formData.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              placeholder="Describe the issue in detail"
+              rows={4}
+              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
 
-                    <div>
-                        <label className="text-sm font-medium">Request Type</label>
-                        <select
-                            className="input mt-1"
-                            value={form.requestType}
-                            onChange={(e) =>
-                                setForm({ ...form, requestType: e.target.value })
-                            }
-                        >
-                            <option value="corrective">Corrective</option>
-                            <option value="preventive">Preventive</option>
-                        </select>
-                    </div>
-                </div>
+          {/* Equipment Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Equipment *
+            </label>
+            {!equipmentId && (
+              <Input
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search equipment..."
+                className="mb-2"
+              />
+            )}
+            <Select
+              value={formData.equipmentId}
+              onChange={(value) => {
+                handleEquipmentChange(value);
+                handleChange("equipmentId", value);
+              }}
+              placeholder="Select equipment"
+              options={filteredEquipment.map((eq) => ({
+                value: eq.equipmentId,
+                label: `${eq.equipmentName} (${eq.serialNumber})`,
+              }))}
+              className={errors.equipmentId ? "border-red-500" : ""}
+            />
+            {errors.equipmentId && (
+              <p className="text-sm text-red-600 mt-1">{errors.equipmentId}</p>
+            )}
+            {selectedEquipment && (
+              <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm">
+                <p className="text-blue-900">
+                  <strong>Category:</strong> {selectedEquipment.category?.categoryName}
+                </p>
+                <p className="text-blue-900">
+                  <strong>Team:</strong> {selectedEquipment.maintenanceTeam?.teamName}
+                </p>
+              </div>
+            )}
+          </div>
 
-                {/* Date & Duration */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="text-sm font-medium">Scheduled Date</label>
-                        <input
-                            type="date"
-                            className="input mt-1"
-                            value={form.scheduledDate}
-                            onChange={(e) =>
-                                setForm({ ...form, scheduledDate: e.target.value })
-                            }
-                        />
-                    </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Priority */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Priority *
+              </label>
+              <Select
+                value={formData.priority}
+                onChange={(value) => handleChange("priority", value)}
+                options={[
+                  { value: "low", label: "Low" },
+                  { value: "medium", label: "Medium" },
+                  { value: "high", label: "High" },
+                  { value: "urgent", label: "Urgent" },
+                ]}
+                className={errors.priority ? "border-red-500" : ""}
+              />
+              {errors.priority && (
+                <p className="text-sm text-red-600 mt-1">{errors.priority}</p>
+              )}
+            </div>
 
-                    <div>
-                        <label className="text-sm font-medium">Duration (hours)</label>
-                        <input
-                            type="number"
-                            step="0.5"
-                            className="input mt-1"
-                            placeholder="e.g. 2.5"
-                            value={form.durationHours}
-                            onChange={(e) =>
-                                setForm({ ...form, durationHours: e.target.value })
-                            }
-                        />
-                    </div>
-                </div>
+            {/* Request Type */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Type *
+              </label>
+              <Select
+                value={formData.requestType}
+                onChange={(value) => handleChange("requestType", value)}
+                options={[
+                  { value: "corrective", label: "Corrective" },
+                  { value: "preventive", label: "Preventive" },
+                ]}
+                className={errors.requestType ? "border-red-500" : ""}
+              />
+              {errors.requestType && (
+                <p className="text-sm text-red-600 mt-1">{errors.requestType}</p>
+              )}
+            </div>
 
-                {/* Submit */}
-                <div className="pt-4">
-                    <button
-                        type="submit"
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded"
-                    >
-                        Create Request
-                    </button>
-                </div>
-            </form>
-        </div>
-    );
+            {/* Scheduled Date */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Scheduled Date
+              </label>
+              <Input
+                type="datetime-local"
+                value={formData.scheduledDate}
+                onChange={(e) => handleChange("scheduledDate", e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Submit */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/requests")}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {loading
+                ? "Saving..."
+                : initialData
+                ? "Update Request"
+                : "Create Request"}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
+  );
 };

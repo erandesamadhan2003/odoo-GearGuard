@@ -386,7 +386,7 @@ const maintenanceRequestSlice = createSlice({
             })
             .addCase(fetchCalendarRequests.fulfilled, (state, action) => {
                 state.loading = false;
-                state.calendarEvents = action.payload.events || [];
+                state.calendarEvents = action.payload.requests || action.payload.events || [];
             })
             .addCase(fetchCalendarRequests.rejected, (state, action) => {
                 state.loading = false;

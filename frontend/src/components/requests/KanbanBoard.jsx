@@ -1,75 +1,50 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { KanbanColumn } from "./KanbanColumn";
+import { useRequest } from "@/hooks/useRequest";
+import { useTeams } from "@/hooks/useTeams";
+import { Select } from "@/components/common/Select";
+import { Card } from "@/components/common/Card";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { useSearchParams } from "react-router";
 
-const teams = [
-  { id: 1, name: "Electrical Team" },
-  { id: 2, name: "Mechanical Team" },
-  { id: 3, name: "IT Support" },
-];
-
-const requests = [
-  {
-   request_id: 1,
-    subject: "AC not working",
-    stage: "new",
-    priority: "urgent",
-    equipment_name: "Office AC",
-    is_overdue: true,
-    maintenance_team_id: 1,
-    assigned_technician: { name: "Rahul" },
-  },
-  {
-    request_id: 2,
-    subject: "Printer issue",
-    stage: "in_progress",
-    priority: "medium",
-    equipment_name: "HP Printer",
-    is_overdue: false,
-    maintenance_team_id: 3,
-    assigned_technician: { name: "Anita" },
-  },
-  {
-    request_id: 3,
-    subject: "Generator maintenance",
-    stage: "repaired",
-    priority: "low",
-    equipment_name: "Generator",
-    is_overdue: false,
-    maintenance_team_id: 2,
-    assigned_technician: { name: "Rohit" },
-  },
-  {
-    request_id: 4,
-    subject: "Network switch failure",
-    stage: "new",
-    priority: "high",
-    equipment_name: "Cisco Switch",
-    is_overdue: true,
-    maintenance_team_id: 3,
-    assigned_technician: null,
-  },
-  {
-    request_id: 5,
-    subject: "Water leakage near pump",
-    stage: "in_progress",
-    priority: "urgent",
-    equipment_name: "Water Pump",
-    is_overdue: true,
-    maintenance_team_id: 2,
-    assigned_technician: { name: "Suresh" },
-  }
+const stages = [
+  { key: "new", label: "New" },
+  { key: "in_progress", label: "In Progress" },
+  { key: "repaired", label: "Repaired" },
+  { key: "scrapped", label: "Scrapped" },
 ];
 
 export const KanbanBoard = () => {
-  const [selectedTeam, setSelectedTeam] = useState("all");
+  const [searchParams] = useSearchParams();
+  const { requests, loading, getAllRequests, moveRequest } = useRequest();
+  const { teams, getAllTeams } = useTeams();
+  const [selectedTeam, setSelectedTeam] = useState(
+    searchParams.get("team") || "all"
+  );
+
+  useEffect(() => {
+    getAllRequests();
+    getAllTeams();
+  }, []);
+
+  const handleDrop = async (requestId, newStage) => {
+    const request = requests.find((r) => r.requestId === requestId);
+    if (request && request.stage !== newStage) {
+      try {
+        await moveRequest(requestId, request.stage, newStage);
+      } catch (error) {
+        console.error("Failed to move request:", error);
+      }
+    }
+  };
 
   const filteredRequests =
     selectedTeam === "all"
       ? requests
       : requests.filter(
-          r => r.maintenance_team_id === Number(selectedTeam)
+          (r) => r.maintenanceTeamId === parseInt(selectedTeam)
         );
 
   const grouped = {
@@ -79,36 +54,61 @@ export const KanbanBoard = () => {
     scrapped: [],
   };
 
-  filteredRequests.forEach(r => grouped[r.stage].push(r));
+  filteredRequests.forEach((r) => {
+    if (grouped[r.stage]) {
+      grouped[r.stage].push(r);
+    }
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <DndProvider backend={HTML5Backend}>
-      {/* Team Filter */}
-      <div className="flex gap-4 mb-4">
-        <select
-          className="border px-3 py-2 rounded"
-          value={selectedTeam}
-          onChange={(e) => setSelectedTeam(e.target.value)}
-        >
-          <option value="all">All Teams</option>
-          {teams.map(t => (
-            <option key={t.id} value={t.id}>
-              {t.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* Filters */}
+      <Card className="mb-6">
+        <div className="p-4">
+          <div className="flex items-center gap-4">
+            <label className="text-sm font-medium text-slate-700">Filter by Team:</label>
+            <Select
+              value={selectedTeam}
+              onChange={setSelectedTeam}
+              className="w-64"
+              options={[
+                { value: "all", label: "All Teams" },
+                ...teams.map((team) => ({
+                  value: team.teamId,
+                  label: team.teamName,
+                })),
+              ]}
+            />
+          </div>
+        </div>
+      </Card>
 
-      {/* Columns */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {["new", "in_progress", "repaired", "scrapped"].map(stage => (
+      {/* Kanban Columns */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stages.map((stage) => (
           <KanbanColumn
-            key={stage}
-            stage={stage}
-            items={grouped[stage]}
+            key={stage.key}
+            stage={stage.key}
+            label={stage.label}
+            items={grouped[stage.key] || []}
+            onDrop={handleDrop}
           />
         ))}
       </div>
+
+      {filteredRequests.length === 0 && (
+        <div className="text-center py-12 text-slate-500">
+          No requests found. Try adjusting your filters.
+        </div>
+      )}
     </DndProvider>
   );
 };

@@ -105,8 +105,8 @@ export const createTeam = async (req, res) => {
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to create team'
-        });
-    }
+            });
+        }
 };
 
 // Update team

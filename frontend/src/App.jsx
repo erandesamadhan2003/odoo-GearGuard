@@ -3,11 +3,23 @@ import "./App.css";
 import { Home } from "./pages/Home";
 import { Login } from "./pages/auth/Login";
 import { Signup } from "./pages/auth/Signup";
-import { Dashboard } from "./pages/Dashboard";
+import { DashboardPage } from "./pages/DashboardPage";
 import { useSelector } from "react-redux";
 import KanbanPage from "./pages/KanbanPage";
 import { CreateRequestPage } from "./pages/requests/CreateRequestPage";
 import { EditRequestPage } from "./pages/requests/EditRequestPage";
+import { RequestDetailPage } from "./pages/RequestDetailPage";
+import { RequestsPage } from "./pages/RequestsPage";
+import { EquipmentPage } from "./pages/EquipmentPage";
+import { EquipmentDetailPage } from "./pages/EquipmentDetailPage";
+import { CreateEquipmentPage } from "./pages/CreateEquipmentPage";
+import { EditEquipmentPage } from "./pages/EditEquipmentPage";
+import { TeamsPage } from "./pages/TeamsPage";
+import { CategoriesPage } from "./pages/CategoriesPage";
+import { DepartmentsPage } from "./pages/DepartmentsPage";
+import { CalendarPage } from "./pages/CalendarPage";
+import { AnalyticsPage } from "./pages/AnalyticsPage";
+import { NotFoundPage } from "./pages/NotFoundPage";
 import { AuthCallBack } from "./pages/auth/AuthCallBack";
 import { useEffect, useState } from "react";
 
@@ -81,38 +93,144 @@ const Router = createBrowserRouter([
     path: "/auth/callback",
     element: <AuthCallBack />,
   },
-  // {
-  //   path: "/dashboard",
-  //   element: (
-  //     <ProtectedRoute>
-  //       <Dashboard />
-  //     </ProtectedRoute>
-  //   ),
-  // },
   {
     path: "/dashboard",
-    element: <Dashboard />,
-  },
-  ,{
-    path:"/requests",
-    element:<KanbanPage/>,
-  }
-  ,
-  {
-    path:"/requests/new",
-    element:<CreateRequestPage/>
+    element: (
+      <ProtectedRoute>
+        <DashboardPage />
+      </ProtectedRoute>
+    ),
   },
   {
-    path:"requests/:id/edit",
-    element:<EditRequestPage/>
-  }
+    path: "/equipment",
+    element: (
+      <ProtectedRoute>
+        <EquipmentPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/equipment/new",
+    element: (
+      <ProtectedRoute>
+        <CreateEquipmentPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/equipment/:id",
+    element: (
+      <ProtectedRoute>
+        <EquipmentDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/equipment/:id/edit",
+    element: (
+      <ProtectedRoute>
+        <EditEquipmentPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/requests",
+    element: (
+      <ProtectedRoute>
+        <KanbanPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/requests/list",
+    element: (
+      <ProtectedRoute>
+        <RequestsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/requests/new",
+    element: (
+      <ProtectedRoute>
+        <CreateRequestPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/requests/:id",
+    element: (
+      <ProtectedRoute>
+        <RequestDetailPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/requests/:id/edit",
+    element: (
+      <ProtectedRoute>
+        <EditRequestPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/kanban",
+    element: (
+      <ProtectedRoute>
+        <KanbanPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/teams",
+    element: (
+      <ProtectedRoute>
+        <TeamsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/categories",
+    element: (
+      <ProtectedRoute>
+        <CategoriesPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/departments",
+    element: (
+      <ProtectedRoute>
+        <DepartmentsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/calendar",
+    element: (
+      <ProtectedRoute>
+        <CalendarPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/analytics",
+    element: (
+      <ProtectedRoute>
+        <AnalyticsPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <NotFoundPage />,
+  },
 ]);
 
 function App() {
   return (
     <>
       <RouterProvider router={Router} />
-      {/* <Footer /> */}
     </>
   );
 }

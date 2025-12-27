@@ -413,8 +413,8 @@ export const getCalendarRequests = async (req, res) => {
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to fetch calendar requests'
-        });
-    }
+            });
+        }
 };
 
 // Get my requests (created by current user)

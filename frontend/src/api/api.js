@@ -68,8 +68,10 @@ export const MAINTENANCE_REQUEST_URL = {
 export const DASHBOARD_URL = {
     GET_STATS: '/dashboard/stats',
     GET_OVERDUE: '/dashboard/overdue',
-    REQUESTS_BY_TEAM: '/reports/requests-by-team',
-    REQUESTS_BY_CATEGORY: '/reports/requests-by-category',
+    REQUESTS_BY_TEAM: '/dashboard/reports/requests-by-team',
+    REQUESTS_BY_CATEGORY: '/dashboard/reports/requests-by-category',
+    REQUESTS_OVER_TIME: '/dashboard/requests-over-time',
+    TECHNICIAN_PERFORMANCE: '/dashboard/technician-performance',
 };
 
 const api = axios.create({
