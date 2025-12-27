@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/common/Card";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import {
   BarChart,
@@ -20,10 +21,18 @@ import {
 } from "recharts";
 import { BarChart3, TrendingUp, Users, Wrench } from "lucide-react";
 import { dashboardApi, DASHBOARD_URL } from "@/api/api";
+import { canViewAnalytics } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"];
 
 export const AnalyticsPage = () => {
+  const { user } = useAuth();
+
+  // Redirect operators/users who can't view analytics
+  if (!canViewAnalytics(user)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const {
     stats,
     requestsByTeam,

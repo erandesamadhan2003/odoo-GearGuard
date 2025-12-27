@@ -12,6 +12,7 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { EmptyState } from "@/components/common/EmptyState";
 import { Plus, Cpu, User, Building2 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { canManageEquipment } from "@/utils/roles";
 
 const getStatusVariant = (status) => {
   const map = {
@@ -33,7 +34,6 @@ export const EquipmentPage = () => {
     categories,
   } = useEquipment();
   const { departments, getAllDepartments } = useDepartment();
-  const isAdmin = user?.role === "admin" || user?.role === "manager";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [departmentFilter, setDepartmentFilter] = useState("");
@@ -68,7 +68,7 @@ export const EquipmentPage = () => {
               Manage and track all equipment
             </p>
           </div>
-          {isAdmin && (
+          {canManageEquipment(user) && (
             <Button
               onClick={() => navigate("/equipment/new")}
               className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -135,7 +135,7 @@ export const EquipmentPage = () => {
                 : "Get started by adding your first equipment"
             }
             action={
-              isAdmin && (
+              canManageEquipment(user) && (
                 <Button
                   onClick={() => navigate("/equipment/new")}
                   className="bg-blue-600 hover:bg-blue-700 text-white"

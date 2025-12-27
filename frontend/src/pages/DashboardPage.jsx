@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useRequest } from "@/hooks/useRequest";
+import { useAuth } from "@/hooks/useAuth";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { OverdueAlert } from "@/components/dashboard/OverdueAlert";
@@ -15,8 +16,11 @@ import {
   Clock
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { canViewDashboard } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const DashboardPage = () => {
+  const { user } = useAuth();
   const {
     stats,
     overdueRequests,
@@ -27,11 +31,17 @@ export const DashboardPage = () => {
   const { requests, getAllRequests } = useRequest();
   const navigate = useNavigate();
 
+  // Only Admin and Manager can view Dashboard per matrix
+  if (!canViewDashboard(user)) {
+    return <Navigate to="/requests" replace />;
+  }
+
   useEffect(() => {
+    // Admin/Manager: Get all stats and requests
     getDashboardStats();
     getOverdueRequests();
     getAllRequests();
-  }, []);
+  }, [user]);
 
   if (loading && !stats) {
     return (
@@ -60,7 +70,7 @@ export const DashboardPage = () => {
         {/* Overdue Alert */}
         <OverdueAlert count={stats?.overdueCount || 0} />
 
-        {/* Stats Grid */}
+        {/* Stats Grid - Admin/Manager only */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatsCard
             title="Total Requests"
@@ -77,11 +87,11 @@ export const DashboardPage = () => {
             onClick={() => navigate("/requests?stage=in_progress")}
           />
           <StatsCard
-            title="Repaired"
-            value={stats?.byStage?.repaired || 0}
+            title="Completed"
+            value={stats?.byStage?.completed || 0}
             icon={CheckCircle2}
             variant="success"
-            onClick={() => navigate("/requests?stage=repaired")}
+            onClick={() => navigate("/requests?stage=completed")}
           />
           <StatsCard
             title="Overdue"

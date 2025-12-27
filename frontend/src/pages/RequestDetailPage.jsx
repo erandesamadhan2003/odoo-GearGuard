@@ -2,21 +2,32 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useRequest } from "@/hooks/useRequest";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/common/Card";
+import { useAuth } from "@/hooks/useAuth";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/common/Card";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
-import { ArrowLeft, Edit, User, Calendar, Clock, FileText, StickyNote } from "lucide-react";
+import {
+  ArrowLeft,
+  Edit,
+  User,
+  Calendar,
+  Clock,
+  FileText,
+  StickyNote,
+} from "lucide-react";
 import moment from "moment";
 
 export const RequestDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const {
-    selectedRequest,
-    loading,
-    getRequestById,
-  } = useRequest();
+  const { user } = useAuth();
+  const { selectedRequest, loading, getRequestById } = useRequest();
 
   useEffect(() => {
     if (id) {
@@ -35,7 +46,12 @@ export const RequestDetailPage = () => {
   }
 
   const getPriorityVariant = (priority) => {
-    const map = { low: "default", medium: "info", high: "warning", urgent: "danger" };
+    const map = {
+      low: "default",
+      medium: "info",
+      high: "warning",
+      urgent: "danger",
+    };
     return map[priority] || "default";
   };
 
@@ -68,13 +84,13 @@ export const RequestDetailPage = () => {
                   {selectedRequest.subject}
                 </h1>
                 <div className="flex items-center gap-3 flex-wrap">
-                  <Badge 
+                  <Badge
                     variant={getPriorityVariant(selectedRequest.priority)}
                     className="text-sm px-3 py-1"
                   >
                     {selectedRequest.priority?.toUpperCase()}
                   </Badge>
-                  <Badge 
+                  <Badge
                     variant={getStageVariant(selectedRequest.stage)}
                     className="text-sm px-3 py-1 capitalize"
                   >
@@ -88,7 +104,7 @@ export const RequestDetailPage = () => {
                 </div>
               </div>
             </div>
-            {isAdmin && (
+            {canEditRequest(user, selectedRequest) && (
               <Button
                 variant="outline"
                 onClick={() => navigate(`/requests/${id}/edit`)}
@@ -144,23 +160,37 @@ export const RequestDetailPage = () => {
               <CardContent className="pt-6 space-y-5">
                 {selectedRequest.equipment && (
                   <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Equipment</p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.equipment.equipmentName}</p>
-                    <p className="text-sm text-slate-500 mt-1">{selectedRequest.equipment.serialNumber}</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Equipment
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.equipment.equipmentName}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {selectedRequest.equipment.serialNumber}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.category && (
                   <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Category</p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.category.categoryName}</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Category
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.category.categoryName}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.maintenanceTeam && (
                   <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Team</p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.maintenanceTeam.teamName}</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Team
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.maintenanceTeam.teamName}
+                    </p>
                   </div>
                 )}
 
@@ -171,7 +201,9 @@ export const RequestDetailPage = () => {
                       Scheduled Date
                     </p>
                     <p className="font-semibold text-slate-900">
-                      {moment(selectedRequest.scheduledDate).format("MMM D, YYYY")}
+                      {moment(selectedRequest.scheduledDate).format(
+                        "MMM D, YYYY"
+                      )}
                     </p>
                     <p className="text-sm text-slate-500 mt-1">
                       {moment(selectedRequest.scheduledDate).format("h:mm A")}
@@ -185,15 +217,23 @@ export const RequestDetailPage = () => {
                       <User className="w-4 h-4" />
                       Assigned To
                     </p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.assignedTo.fullName}</p>
-                    <p className="text-sm text-slate-500 mt-1">{selectedRequest.assignedTo.email}</p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.assignedTo.fullName}
+                    </p>
+                    <p className="text-sm text-slate-500 mt-1">
+                      {selectedRequest.assignedTo.email}
+                    </p>
                   </div>
                 )}
 
                 {selectedRequest.createdBy && (
                   <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Created By</p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.createdBy.fullName}</p>
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                      Created By
+                    </p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.createdBy.fullName}
+                    </p>
                   </div>
                 )}
 
@@ -217,4 +257,3 @@ export const RequestDetailPage = () => {
     </DashboardLayout>
   );
 };
-

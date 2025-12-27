@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Modal } from "@/components/common/Modal";
+import { getRoleDisplayName } from "@/utils/roles";
 
 const pageTitles = {
   "/dashboard": "Dashboard",
@@ -70,9 +71,9 @@ export const Topbar = ({ toggleSidebar }) => {
               <span className="text-sm font-semibold text-slate-900 leading-tight">
                 {user?.fullName ?? "User"}
               </span>
-              <span className="text-xs text-slate-500 capitalize leading-tight">
-                {user?.role ?? "user"}
-              </span>
+                     <span className="text-xs text-slate-500 leading-tight">
+                       {getRoleDisplayName(user?.role ?? "user")}
+                     </span>
             </div>
           </div>
           <Button

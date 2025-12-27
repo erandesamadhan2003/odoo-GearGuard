@@ -10,12 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/common/Modal";
 import { useNavigate } from "react-router";
+import { canManageTeams } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const TeamsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { teams, loading, getAllTeams, createTeam } = useTeams();
-  const isAdmin = user?.role === "admin" || user?.role === "manager";
+
+  // Only Admin/Manager can access Teams page
+  if (!canManageTeams(user)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ teamName: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -47,7 +53,7 @@ export const TeamsPage = () => {
             <h1 className="text-3xl font-bold text-slate-900">Teams</h1>
             <p className="text-slate-600 mt-1">Manage maintenance teams</p>
           </div>
-          {isAdmin && (
+          {canManageTeams(user) && (
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => setShowModal(true)}

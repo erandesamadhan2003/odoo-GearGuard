@@ -1,16 +1,25 @@
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useRequest } from "@/hooks/useRequest";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/common/Card";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { MaintenanceCalendar } from "@/components/calender/MaintenanceCalendar";
 import { Badge } from "@/components/common/Badge";
 import { Select } from "@/components/common/Select";
+import { isAdminOrManager } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const CalendarPage = () => {
+  const { user } = useAuth();
   const { calendarEvents, loading, getCalendarRequests } = useRequest();
   const [view, setView] = useState("month");
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // Only Admin and Manager can view Calendar (following dashboard pattern)
+  if (!isAdminOrManager(user)) {
+    return <Navigate to="/requests" replace />;
+  }
 
   useEffect(() => {
     getCalendarRequests();

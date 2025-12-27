@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useRequest } from "@/hooks/useRequest";
+import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent } from "@/components/common/Card";
 import { Badge } from "@/components/common/Badge";
 import { SearchBar } from "@/components/common/SearchBar";
@@ -11,6 +12,7 @@ import { EmptyState } from "@/components/common/EmptyState";
 import { Plus, Wrench, Clock, User } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router";
 import moment from "moment";
+import { isAdminOrManager, isTechnician, isOperator } from "@/utils/roles";
 
 const getPriorityVariant = (priority) => {
   const map = { low: "default", medium: "info", high: "warning", urgent: "danger" };
@@ -21,6 +23,9 @@ const getStageVariant = (stage) => {
   const map = {
     new: "info",
     in_progress: "warning",
+    on_hold: "default",
+    completed: "success",
+    cancelled: "danger",
     repaired: "success",
     scrapped: "danger",
   };
@@ -29,8 +34,17 @@ const getStageVariant = (stage) => {
 
 export const RequestsPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const { requests, loading, getAllRequests } = useRequest();
+  const { 
+    requests, 
+    assignedRequests, 
+    myRequests,
+    loading, 
+    getAllRequests,
+    getAssignedRequests,
+    getMyRequests
+  } = useRequest();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [stageFilter, setStageFilter] = useState(searchParams.get("stage") || "");
@@ -38,10 +52,26 @@ export const RequestsPage = () => {
   const [typeFilter, setTypeFilter] = useState("");
 
   useEffect(() => {
-    getAllRequests();
-  }, []);
+    if (isAdminOrManager(user)) {
+      getAllRequests();
+    } else if (isTechnician(user)) {
+      getAssignedRequests();
+    } else if (isOperator(user)) {
+      getMyRequests();
+    }
+  }, [user]);
 
-  const filteredRequests = requests.filter((request) => {
+  // Get requests based on role
+  const getRoleBasedRequests = () => {
+    if (isAdminOrManager(user)) return requests;
+    if (isTechnician(user)) return assignedRequests;
+    if (isOperator(user)) return myRequests;
+    return [];
+  };
+
+  const roleRequests = getRoleBasedRequests();
+
+  const filteredRequests = roleRequests.filter((request) => {
     const matchesSearch =
       request.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.description?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -58,18 +88,31 @@ export const RequestsPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Maintenance Requests</h1>
+            <h1 className="text-3xl font-bold text-slate-900">
+              {isAdminOrManager(user) 
+                ? "Maintenance Requests" 
+                : isTechnician(user)
+                ? "Assigned Requests"
+                : "My Requests"}
+            </h1>
             <p className="text-slate-600 mt-1">
-              Track and manage all maintenance requests
+              {isAdminOrManager(user)
+                ? "Track and manage all maintenance requests"
+                : isTechnician(user)
+                ? "View and update requests assigned to you"
+                : "Track your maintenance requests"}
             </p>
           </div>
-          <Button
-            onClick={() => navigate("/requests/new")}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            New Request
-          </Button>
+          {/* Only Admin, Manager, and Operator can create requests per matrix (Technician cannot) */}
+          {(isAdminOrManager(user) || isOperator(user)) && (
+            <Button
+              onClick={() => navigate("/requests/new")}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              New Request
+            </Button>
+          )}
         </div>
 
         {/* Filters */}
@@ -88,6 +131,9 @@ export const RequestsPage = () => {
                 options={[
                   { value: "new", label: "New" },
                   { value: "in_progress", label: "In Progress" },
+                  { value: "on_hold", label: "On Hold" },
+                  { value: "completed", label: "Completed" },
+                  { value: "cancelled", label: "Cancelled" },
                   { value: "repaired", label: "Repaired" },
                   { value: "scrapped", label: "Scrapped" },
                 ]}

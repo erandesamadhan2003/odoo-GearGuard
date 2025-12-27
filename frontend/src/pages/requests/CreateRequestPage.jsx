@@ -3,11 +3,20 @@ import { RequestForm } from "@/components/requests/RequestForm";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useSearchParams } from "react-router";
+import { useAuth } from "@/hooks/useAuth";
+import { isAdminOrManager, isOperator } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const CreateRequestPage = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const equipmentId = searchParams.get("equipmentId");
+
+  // Only Admin, Manager, and Operator can create requests per matrix (Technician cannot)
+  if (!isAdminOrManager(user) && !isOperator(user)) {
+    return <Navigate to="/requests" replace />;
+  }
 
   return (
     <DashboardLayout>

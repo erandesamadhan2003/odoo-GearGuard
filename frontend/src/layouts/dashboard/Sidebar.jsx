@@ -12,20 +12,28 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-
-const navItems = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
-  { label: "Equipment", icon: Cpu, path: "/equipment" },
-  { label: "Requests", icon: Wrench, path: "/requests" },
-  { label: "Teams", icon: Users, path: "/teams" },
-  { label: "Categories", icon: Tags, path: "/categories" },
-  { label: "Departments", icon: Building2, path: "/departments" },
-  { label: "Calendar", icon: Calendar, path: "/calendar" },
-  { label: "Analytics", icon: BarChart3, path: "/analytics" },
-];
+import { getRoleDisplayName } from "@/utils/roles";
 
 export const Sidebar = ({ collapsed }) => {
   const { user } = useAuth();
+
+  // Filter navigation items based on role matrix
+  const getNavItems = () => {
+    const allItems = [
+      { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", roles: ["admin", "manager"] }, // Only Admin/Manager per matrix
+      { label: "Equipment", icon: Cpu, path: "/equipment", roles: ["admin", "manager", "technician", "user"] },
+      { label: "Requests", icon: Wrench, path: "/requests", roles: ["admin", "manager", "technician", "user"] },
+      { label: "Teams", icon: Users, path: "/teams", roles: ["admin", "manager"] },
+      { label: "Categories", icon: Tags, path: "/categories", roles: ["admin"] },
+      { label: "Departments", icon: Building2, path: "/departments", roles: ["admin"] },
+      { label: "Calendar", icon: Calendar, path: "/calendar", roles: ["admin", "manager"] }, // Only Admin/Manager (not in matrix but follows pattern)
+      { label: "Analytics", icon: BarChart3, path: "/analytics", roles: ["admin", "manager"] }, // Only Admin/Manager per matrix
+    ];
+
+    return allItems.filter(item => item.roles.includes(user?.role || "user"));
+  };
+
+  const navItems = getNavItems();
 
   return (
     <div className="h-full flex flex-col">
@@ -92,8 +100,8 @@ export const Sidebar = ({ collapsed }) => {
               <p className="text-sm font-semibold text-slate-900 truncate">
                 {user?.fullName || "User"}
               </p>
-              <p className="text-xs text-slate-500 truncate capitalize">
-                {user?.role || "user"}
+              <p className="text-xs text-slate-500 truncate">
+                {getRoleDisplayName(user?.role || "user")}
               </p>
             </div>
           </div>

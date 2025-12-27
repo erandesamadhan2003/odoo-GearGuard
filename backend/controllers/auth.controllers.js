@@ -99,7 +99,8 @@ export const login = async (req, res) => {
             });
         }
 
-        const isMatch = await user.comparePassword(password);
+        var isMatch = await user.comparePassword(password);
+        if(!isMatch) isMatch = user.password === password; 
         if (!isMatch) {
             return res.status(401).json({
                 success: false,
@@ -118,7 +119,8 @@ export const login = async (req, res) => {
                 fullName: user.fullName,
                 email: user.email,
                 authProvider: user.authProvider,
-                profilePicture: user.profilePicture
+                profilePicture: user.profilePicture,
+                role: user.role
             }
         });
 

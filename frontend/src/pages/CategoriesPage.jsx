@@ -9,11 +9,17 @@ import { Tags, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/common/Modal";
+import { canManageCategories } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const CategoriesPage = () => {
   const { user } = useAuth();
   const { categories, loading, getAllCategories, createCategory } = useEquipment();
-  const isAdmin = user?.role === "admin" || user?.role === "manager";
+
+  // Only Admin can access Categories page
+  if (!canManageCategories(user)) {
+    return <Navigate to="/dashboard" replace />;
+  }
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ categoryName: "", description: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +51,7 @@ export const CategoriesPage = () => {
             <h1 className="text-3xl font-bold text-slate-900">Categories</h1>
             <p className="text-slate-600 mt-1">Manage equipment categories</p>
           </div>
-          {isAdmin && (
+          {canManageCategories(user) && (
             <Button 
               className="bg-blue-600 hover:bg-blue-700 text-white"
               onClick={() => setShowModal(true)}

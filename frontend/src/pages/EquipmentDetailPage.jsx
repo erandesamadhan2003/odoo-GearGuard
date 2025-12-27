@@ -10,12 +10,12 @@ import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { ArrowLeft, Edit, Trash2, Wrench, Calendar, Building2, User, Cpu } from "lucide-react";
 import { Modal } from "@/components/common/Modal";
 import { useState } from "react";
+import { canManageEquipment, isAdmin, isAdminOrManager } from "@/utils/roles";
 
 export const EquipmentDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "manager";
   const {
     selectedEquipment,
     equipmentRequests,
@@ -83,22 +83,27 @@ export const EquipmentDetailPage = () => {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/equipment/${id}/edit`)}
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteModal(true)}
-            >
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </Button>
-          </div>
+          {canManageEquipment(user) && (
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/equipment/${id}/edit`)}
+              >
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+              {/* Manager has optional/restricted access to delete/scrap per matrix */}
+              {isAdminOrManager(user) && (
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </Button>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -177,13 +182,15 @@ export const EquipmentDetailPage = () => {
                       </Badge>
                     )}
                   </div>
-                  <Button
-                    onClick={() => navigate(`/requests/new?equipmentId=${id}`)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white"
-                  >
-                    <Wrench className="w-4 h-4 mr-2" />
-                    New Request
-                  </Button>
+                  {(canManageEquipment(user) || !user) && (
+                    <Button
+                      onClick={() => navigate(`/requests/new?equipmentId=${id}`)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      <Wrench className="w-4 h-4 mr-2" />
+                      New Request
+                    </Button>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
@@ -237,13 +244,15 @@ export const EquipmentDetailPage = () => {
                 <CardTitle>Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-                  onClick={() => navigate(`/requests/new?equipmentId=${id}`)}
-                >
-                  <Wrench className="w-4 h-4 mr-2" />
-                  Create Request
-                </Button>
+                {(canManageEquipment(user) || !user) && (
+                  <Button
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                    onClick={() => navigate(`/requests/new?equipmentId=${id}`)}
+                  >
+                    <Wrench className="w-4 h-4 mr-2" />
+                    Create Request
+                  </Button>
+                )}
                 {openRequests.length > 0 && (
                   <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                     <p className="text-sm font-medium text-yellow-900">

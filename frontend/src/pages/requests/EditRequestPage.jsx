@@ -3,13 +3,17 @@ import { useParams, useNavigate } from "react-router";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { RequestForm } from "@/components/requests/RequestForm";
 import { useRequest } from "@/hooks/useRequest";
+import { useAuth } from "@/hooks/useAuth";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { canEditRequest } from "@/utils/roles";
+import { Navigate } from "react-router";
 
 export const EditRequestPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { selectedRequest, loading, getRequestById } = useRequest();
 
   useEffect(() => {
@@ -26,6 +30,11 @@ export const EditRequestPage = () => {
         </div>
       </DashboardLayout>
     );
+  }
+
+  // Check if user can edit this request
+  if (!canEditRequest(user, selectedRequest)) {
+    return <Navigate to={`/requests/${id}`} replace />;
   }
 
   return (
