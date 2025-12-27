@@ -22,7 +22,7 @@ const mockEquipment = [
     },
 ];
 
-export const RequestForm = ({initialData=null}) => {
+export const RequestForm = ({initialData}) => {
     const [search, setSearch] = useState("");
     const [form, setForm] = useState(
         initialData || {
