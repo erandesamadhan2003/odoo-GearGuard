@@ -59,9 +59,7 @@ export const Sidebar = ({ collapsed }) => {
               cn(
                 "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-base font-medium transition",
                 "hover:bg-blue-50 hover:text-blue-600",
-                isActive
-                  ? "bg-blue-50 text-blue-600"
-                  : "text-slate-700"
+                isActive ? "bg-blue-50 text-blue-600" : "text-slate-700"
               )
             }
           >
@@ -75,7 +73,7 @@ export const Sidebar = ({ collapsed }) => {
       <div className="p-4 border-t border-slate-200">
         {collapsed ? (
           <div className="flex justify-center">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md">
               <span className="text-white font-semibold text-sm">
                 {user?.fullName?.charAt(0)?.toUpperCase() || "U"}
               </span>
@@ -83,7 +81,7 @@ export const Sidebar = ({ collapsed }) => {
           </div>
         ) : (
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shrink-0">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shrink-0">
               {user?.profilePicture ? (
                 <img
                   src={user.profilePicture}

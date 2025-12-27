@@ -57,9 +57,9 @@ export const canAssignRequests = (user) => {
   return isAdminOrManager(user);
 };
 
-// Check if user can view analytics (Admin, Manager only - per matrix)
+// Check if user can view analytics (Admin, Manager)
 export const canViewAnalytics = (user) => {
-  return isAdmin(user) || isManager(user);
+  return isAdminOrManager(user);
 };
 
 // Check if user can view dashboard (Admin, Manager only - per matrix)

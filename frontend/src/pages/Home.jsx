@@ -21,7 +21,7 @@ export const Home = () => {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50 to-slate-100">
       <Navbar />
 
       <div className="container mx-auto px-4 py-16">
@@ -29,7 +29,7 @@ export const Home = () => {
         <section className="text-center mb-24">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-slate-900 mb-6">
             Welcome to{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-blue-800">
+            <span className="text-transparent bg-clip-text bg-linear-to-br from-blue-600 to-blue-800">
               GearGuard
             </span>
           </h1>

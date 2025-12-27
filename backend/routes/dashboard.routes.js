@@ -8,11 +8,13 @@ import {
     getTechnicianPerformance
 } from '../controllers/dashboard.controllers.js';
 import { authMiddleware } from '../middleware/auth.middleware.js';
+import { requireManager } from '../middleware/roleAuth.middleware.js';
 
 const router = express.Router();
 
-// All routes require authentication
+// All dashboard routes require authentication and manager role
 router.use(authMiddleware);
+router.use(requireManager);
 
 // Get dashboard statistics
 router.get('/stats', getDashboardStats);

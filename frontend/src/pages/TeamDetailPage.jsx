@@ -47,7 +47,9 @@ export const TeamDetailPage = () => {
                 {selectedTeam.teamName}
               </h1>
               {selectedTeam.description && (
-                <p className="text-slate-600 mt-1">{selectedTeam.description}</p>
+                <p className="text-slate-600 mt-1">
+                  {selectedTeam.description}
+                </p>
               )}
             </div>
           </div>
@@ -70,7 +72,7 @@ export const TeamDetailPage = () => {
                     className="p-4 border border-slate-200 rounded-lg hover:shadow-md transition-shadow"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-semibold">
                         {member.fullName?.charAt(0)?.toUpperCase() || "U"}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -81,9 +83,7 @@ export const TeamDetailPage = () => {
                           <Mail className="w-3 h-3" />
                           {member.email}
                         </p>
-                        <Badge className="mt-1 capitalize">
-                          {member.role}
-                        </Badge>
+                        <Badge className="mt-1 capitalize">{member.role}</Badge>
                       </div>
                     </div>
                   </div>

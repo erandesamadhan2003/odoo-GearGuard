@@ -48,13 +48,15 @@ export const Topbar = ({ toggleSidebar }) => {
             <Menu className="w-5 h-5 text-slate-700" />
           </button>
 
-          <div className="text-lg font-semibold text-slate-900">{pageTitle}</div>
+          <div className="text-lg font-semibold text-slate-900">
+            {pageTitle}
+          </div>
         </div>
 
         {/* Right (User) */}
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex items-center gap-3 pr-4 border-r border-slate-200">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shrink-0">
+            <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-md shrink-0">
               {user?.profilePicture ? (
                 <img
                   src={user.profilePicture}
@@ -71,9 +73,9 @@ export const Topbar = ({ toggleSidebar }) => {
               <span className="text-sm font-semibold text-slate-900 leading-tight">
                 {user?.fullName ?? "User"}
               </span>
-                     <span className="text-xs text-slate-500 leading-tight">
-                       {getRoleDisplayName(user?.role ?? "user")}
-                     </span>
+              <span className="text-xs text-slate-500 leading-tight">
+                {getRoleDisplayName(user?.role ?? "user")}
+              </span>
             </div>
           </div>
           <Button
@@ -94,14 +96,9 @@ export const Topbar = ({ toggleSidebar }) => {
         onClose={() => setShowLogoutModal(false)}
         title="Logout"
       >
-        <p className="mb-6 text-slate-600">
-          Are you sure you want to logout?
-        </p>
+        <p className="mb-6 text-slate-600">Are you sure you want to logout?</p>
         <div className="flex justify-end gap-3">
-          <Button
-            variant="outline"
-            onClick={() => setShowLogoutModal(false)}
-          >
+          <Button variant="outline" onClick={() => setShowLogoutModal(false)}>
             Cancel
           </Button>
           <Button

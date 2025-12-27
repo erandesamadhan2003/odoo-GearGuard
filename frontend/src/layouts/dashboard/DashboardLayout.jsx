@@ -6,7 +6,7 @@ export const DashboardLayout = ({ children }) => {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-slate-50 via-blue-50 to-slate-100">
+    <div className="h-screen flex bg-linear-to-br from-slate-50 via-blue-50 to-slate-100">
 
       {/* Sidebar */}
       <aside

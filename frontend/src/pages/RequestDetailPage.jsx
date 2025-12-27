@@ -20,6 +20,9 @@ import {
   Clock,
   FileText,
   StickyNote,
+  Wrench,
+  Tags,
+  Users,
 } from "lucide-react";
 import moment from "moment";
 
@@ -35,22 +38,21 @@ export const RequestDetailPage = () => {
     }
   }, [id]);
 
-
   const canEditRequest = (user, request) => {
     if (!user || !request) return false;
-
-    // Allow if user is the creator
-    if (request.createdBy?.id === user.id) return true;
-
-    // Allow if user is assigned to the request
-    if (request.assignedTo?.id === user.id) return true;
-
-    // Allow if user is admin (adjust based on your user role structure)
-    if (user.role === 'admin' || user.isAdmin) return true;
-
+    if (
+      request.createdBy?.userId === user.userId ||
+      request.createdBy?.id === user.id
+    )
+      return true;
+    if (
+      request.assignedTo?.userId === user.userId ||
+      request.assignedTo?.id === user.id
+    )
+      return true;
+    if (user.role === "admin" || user.role === "manager") return true;
     return false;
   };
-
 
   if (loading || !selectedRequest) {
     return (
@@ -76,6 +78,9 @@ export const RequestDetailPage = () => {
     const map = {
       new: "info",
       in_progress: "warning",
+      on_hold: "default",
+      completed: "success",
+      cancelled: "danger",
       repaired: "success",
       scrapped: "danger",
     };
@@ -84,83 +89,90 @@ export const RequestDetailPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-6xl">
-        {/* Header */}
-        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4 flex-1">
+      <div className="space-y-6 max-w-7xl mx-auto">
+        {/* Enhanced Header with Gradient */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl shadow-lg p-8 text-white">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start gap-6 flex-1">
               <Button
                 variant="ghost"
                 onClick={() => navigate("/requests")}
-                className="p-2 hover:bg-slate-100"
+                className="p-3 hover:bg-white/10 text-white rounded-xl"
               >
-                <ArrowLeft className="w-5 h-5" />
+                <ArrowLeft className="w-6 h-6" />
               </Button>
               <div className="flex-1">
-                <h1 className="text-3xl font-bold text-slate-900 mb-3">
-                  {selectedRequest.subject}
-                </h1>
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3 mb-4">
                   <Badge
                     variant={getPriorityVariant(selectedRequest.priority)}
-                    className="text-sm px-3 py-1"
+                    className="text-sm px-4 py-1.5 font-semibold"
                   >
                     {selectedRequest.priority?.toUpperCase()}
                   </Badge>
                   <Badge
                     variant={getStageVariant(selectedRequest.stage)}
-                    className="text-sm px-3 py-1 capitalize"
+                    className="text-sm px-4 py-1.5 capitalize font-semibold"
                   >
                     {selectedRequest.stage?.replace("_", " ")}
                   </Badge>
                   {selectedRequest.requestType && (
-                    <Badge className="text-sm px-3 py-1 capitalize">
+                    <Badge className="text-sm px-4 py-1.5 capitalize font-semibold bg-white/20 text-white">
                       {selectedRequest.requestType}
                     </Badge>
                   )}
                 </div>
+                <h1 className="text-4xl font-bold mb-2">
+                  {selectedRequest.subject}
+                </h1>
+                <p className="text-blue-100 text-lg">
+                  Request ID: #{selectedRequest.requestId}
+                </p>
               </div>
             </div>
             {canEditRequest(user, selectedRequest) && (
               <Button
                 variant="outline"
                 onClick={() => navigate(`/requests/${id}/edit`)}
-                className="ml-4"
+                className="ml-4 bg-white text-blue-600 hover:bg-blue-50 border-0 px-6 py-3 h-auto"
               >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
+                <Edit className="w-5 h-5 mr-2" />
+                Edit Request
               </Button>
             )}
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+          {/* Main Content - Enhanced */}
           <div className="lg:col-span-2 space-y-6">
-            <Card className="shadow-sm">
-              <CardHeader className="border-b border-slate-200">
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
+            <Card className="shadow-md border-0">
+              <CardHeader className="border-b border-slate-100 bg-slate-50">
+                <CardTitle className="flex items-center gap-3 text-xl">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-blue-600" />
+                  </div>
                   Description
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-6">
-                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+              <CardContent className="pt-6 p-8">
+                <p className="text-slate-700 whitespace-pre-wrap leading-relaxed text-lg">
                   {selectedRequest.description || "No description provided"}
                 </p>
               </CardContent>
             </Card>
 
             {selectedRequest.notes && (
-              <Card className="shadow-sm">
-                <CardHeader className="border-b border-slate-200">
-                  <CardTitle className="flex items-center gap-2">
-                    <StickyNote className="w-5 h-5" />
-                    Notes
+              <Card className="shadow-md border-0 bg-yellow-50">
+                <CardHeader className="border-b border-yellow-100">
+                  <CardTitle className="flex items-center gap-3 text-xl">
+                    <div className="w-10 h-10 rounded-lg bg-yellow-100 flex items-center justify-center">
+                      <StickyNote className="w-5 h-5 text-yellow-700" />
+                    </div>
+                    <span className="text-yellow-900">Notes</span>
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6">
-                  <p className="text-slate-700 whitespace-pre-wrap leading-relaxed">
+                <CardContent className="pt-6 p-8">
+                  <p className="text-yellow-900 whitespace-pre-wrap leading-relaxed text-lg">
                     {selectedRequest.notes}
                   </p>
                 </CardContent>
@@ -168,56 +180,67 @@ export const RequestDetailPage = () => {
             )}
           </div>
 
-          {/* Sidebar */}
+          {/* Enhanced Sidebar */}
           <div className="space-y-6">
-            <Card className="shadow-sm sticky top-6">
-              <CardHeader className="border-b border-slate-200">
-                <CardTitle>Request Details</CardTitle>
+            <Card className="shadow-md border-0 sticky top-6">
+              <CardHeader className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50">
+                <CardTitle className="text-xl">Request Details</CardTitle>
               </CardHeader>
-              <CardContent className="pt-6 space-y-5">
+              <CardContent className="pt-6 p-6 space-y-6">
                 {selectedRequest.equipment && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                      Equipment
-                    </p>
-                    <p className="font-semibold text-slate-900">
+                  <div className="pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Wrench className="w-5 h-5 text-blue-600" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Equipment
+                      </p>
+                    </div>
+                    <p className="font-bold text-slate-900 text-lg">
                       {selectedRequest.equipment.equipmentName}
                     </p>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {selectedRequest.equipment.serialNumber}
+                    <p className="text-sm text-slate-500 mt-1 font-mono">
+                      SN: {selectedRequest.equipment.serialNumber}
                     </p>
                   </div>
                 )}
 
                 {selectedRequest.category && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                      Category
-                    </p>
-                    <p className="font-semibold text-slate-900">
+                  <div className="pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Tags className="w-5 h-5 text-purple-600" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Category
+                      </p>
+                    </div>
+                    <p className="font-bold text-slate-900 text-lg">
                       {selectedRequest.category.categoryName}
                     </p>
                   </div>
                 )}
 
                 {selectedRequest.maintenanceTeam && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
-                      Team
-                    </p>
-                    <p className="font-semibold text-slate-900">
+                  <div className="pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users className="w-5 h-5 text-green-600" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Maintenance Team
+                      </p>
+                    </div>
+                    <p className="font-bold text-slate-900 text-lg">
                       {selectedRequest.maintenanceTeam.teamName}
                     </p>
                   </div>
                 )}
 
                 {selectedRequest.scheduledDate && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
-                      <Calendar className="w-4 h-4" />
-                      Scheduled Date
-                    </p>
-                    <p className="font-semibold text-slate-900">
+                  <div className="pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Calendar className="w-5 h-5 text-orange-600" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Scheduled Date
+                      </p>
+                    </div>
+                    <p className="font-bold text-slate-900 text-lg">
                       {moment(selectedRequest.scheduledDate).format(
                         "MMM D, YYYY"
                       )}
@@ -229,37 +252,50 @@ export const RequestDetailPage = () => {
                 )}
 
                 {selectedRequest.assignedTo && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
-                      <User className="w-4 h-4" />
-                      Assigned To
-                    </p>
-                    <p className="font-semibold text-slate-900">
-                      {selectedRequest.assignedTo.fullName}
-                    </p>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {selectedRequest.assignedTo.email}
-                    </p>
+                  <div className="pb-6 border-b border-slate-100">
+                    <div className="flex items-center gap-2 mb-3">
+                      <User className="w-5 h-5 text-indigo-600" />
+                      <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        Assigned To
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                        <span className="text-indigo-700 font-bold">
+                          {selectedRequest.assignedTo.fullName.charAt(0)}
+                        </span>
+                      </div>
+                      <div>
+                        <p className="font-bold text-slate-900">
+                          {selectedRequest.assignedTo.fullName}
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {selectedRequest.assignedTo.email}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 )}
 
                 {selectedRequest.createdBy && (
-                  <div className="pb-4 border-b border-slate-100">
-                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">
+                  <div className="pb-6 border-b border-slate-100">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                       Created By
                     </p>
-                    <p className="font-semibold text-slate-900">
+                    <p className="font-bold text-slate-900">
                       {selectedRequest.createdBy.fullName}
                     </p>
                   </div>
                 )}
 
                 <div>
-                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2 flex items-center gap-2">
-                    <Clock className="w-4 h-4" />
-                    Created
-                  </p>
-                  <p className="font-semibold text-slate-900">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Clock className="w-5 h-5 text-slate-600" />
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                      Created
+                    </p>
+                  </div>
+                  <p className="font-bold text-slate-900">
                     {moment(selectedRequest.createdAt).format("MMM D, YYYY")}
                   </p>
                   <p className="text-sm text-slate-500 mt-1">

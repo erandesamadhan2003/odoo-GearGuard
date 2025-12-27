@@ -1,121 +1,33 @@
-import { MaintenanceRequest, Equipment, MaintenanceTeam, EquipmentCategory, User } from '../models/index.js';
+import { MaintenanceRequest, Equipment, EquipmentCategory, MaintenanceTeam, User } from '../models/index.js';
 import { Op, fn, col, literal } from 'sequelize';
-import { checkOverdue } from '../utils/helpers.js';
 
 // Get dashboard statistics
 export const getDashboardStats = async (req, res) => {
     try {
-        // Total requests
         const totalRequests = await MaintenanceRequest.count();
 
-        // Requests by stage
-        const requestsByStage = await MaintenanceRequest.findAll({
+        const byStage = await MaintenanceRequest.findAll({
             attributes: [
                 'stage',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
+                [fn('COUNT', col('*')), 'count'] // Use * instead of specific column
             ],
-            group: ['stage']
+            group: ['stage'],
+            raw: true
         });
 
-        const stageStats = {};
-        requestsByStage.forEach(item => {
-            stageStats[item.stage] = parseInt(item.getDataValue('count'));
+        const stageMap = {};
+        byStage.forEach(item => {
+            stageMap[item.stage] = parseInt(item.count);
         });
 
-        // Requests by team
-        const requestsByTeam = await MaintenanceRequest.findAll({
-            attributes: [
-                'maintenanceTeamId',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
-            ],
-            include: [
-                {
-                    model: MaintenanceTeam,
-                    as: 'maintenanceTeam',
-                    attributes: ['teamName']
-                }
-            ],
-            group: ['maintenanceTeamId']
-        });
-
-        const teamStats = requestsByTeam.map(item => ({
-            teamId: item.maintenanceTeamId,
-            teamName: item.maintenanceTeam.teamName,
-            count: parseInt(item.getDataValue('count'))
-        }));
-
-        // Requests by category
-        const requestsByCategory = await MaintenanceRequest.findAll({
-            attributes: [
-                'categoryId',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
-            ],
-            include: [
-                {
-                    model: EquipmentCategory,
-                    as: 'category',
-                    attributes: ['categoryName']
-                }
-            ],
-            group: ['categoryId']
-        });
-
-        const categoryStats = requestsByCategory.map(item => ({
-            categoryId: item.categoryId,
-            categoryName: item.category.categoryName,
-            count: parseInt(item.getDataValue('count'))
-        }));
-
-        // Requests by priority
-        const requestsByPriority = await MaintenanceRequest.findAll({
-            attributes: [
-                'priority',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
-            ],
-            group: ['priority']
-        });
-
-        const priorityStats = {};
-        requestsByPriority.forEach(item => {
-            priorityStats[item.priority] = parseInt(item.getDataValue('count'));
-        });
-
-        // Requests by type
-        const requestsByType = await MaintenanceRequest.findAll({
-            attributes: [
-                'requestType',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
-            ],
-            group: ['requestType']
-        });
-
-        const typeStats = {};
-        requestsByType.forEach(item => {
-            typeStats[item.requestType] = parseInt(item.getDataValue('count'));
-        });
-
-        // Total equipment
-        const totalEquipment = await Equipment.count();
-
-        // Equipment by status
-        const equipmentByStatus = await Equipment.findAll({
-            attributes: [
-                'status',
-                [fn('COUNT', literal('`Equipment`.`equipment_id`')), 'count']
-            ],
-            group: ['status']
-        });
-
-        const equipmentStatusStats = {};
-        equipmentByStatus.forEach(item => {
-            equipmentStatusStats[item.status] = parseInt(item.getDataValue('count'));
-        });
-
-        // Overdue requests count
         const overdueCount = await MaintenanceRequest.count({
             where: {
-                isOverdue: true,
-                stage: { [Op.notIn]: ['repaired', 'scrapped'] }
+                scheduledDate: {
+                    [Op.lt]: new Date()
+                },
+                stage: {
+                    [Op.notIn]: ['completed', 'cancelled', 'repaired', 'scrapped']
+                }
             }
         });
 
@@ -123,13 +35,7 @@ export const getDashboardStats = async (req, res) => {
             success: true,
             stats: {
                 totalRequests,
-                byStage: stageStats,
-                byTeam: teamStats,
-                byCategory: categoryStats,
-                byPriority: priorityStats,
-                byType: typeStats,
-                totalEquipment,
-                equipmentByStatus: equipmentStatusStats,
+                byStage: stageMap,
                 overdueCount
             }
         });
@@ -137,7 +43,7 @@ export const getDashboardStats = async (req, res) => {
         console.error('Get dashboard stats error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to fetch dashboard statistics'
+            message: error.message || 'Failed to fetch dashboard stats'
         });
     }
 };
@@ -145,50 +51,24 @@ export const getDashboardStats = async (req, res) => {
 // Get overdue requests
 export const getOverdueRequests = async (req, res) => {
     try {
-        // First update overdue status for all requests
-        const allRequests = await MaintenanceRequest.findAll({
-            where: {
-                scheduledDate: { [Op.not]: null },
-                stage: { [Op.notIn]: ['repaired', 'scrapped'] }
-            }
-        });
-
-        for (const request of allRequests) {
-            const isOverdue = checkOverdue(request.scheduledDate, request.stage);
-            if (request.isOverdue !== isOverdue) {
-                await request.update({ isOverdue }, { silent: true });
-            }
-        }
-
-        // Get overdue requests
         const overdueRequests = await MaintenanceRequest.findAll({
             where: {
-                isOverdue: true,
-                stage: { [Op.notIn]: ['repaired', 'scrapped'] }
+                scheduledDate: {
+                    [Op.lt]: new Date()
+                },
+                stage: {
+                    [Op.notIn]: ['completed', 'cancelled', 'repaired', 'scrapped']
+                }
             },
             include: [
                 {
                     model: Equipment,
                     as: 'equipment',
-                    attributes: ['equipmentId', 'equipmentName', 'serialNumber']
-                },
-                {
-                    model: MaintenanceTeam,
-                    as: 'maintenanceTeam',
-                    attributes: ['teamId', 'teamName']
-                },
-                {
-                    model: User,
-                    as: 'assignedTo',
-                    attributes: ['userId', 'fullName', 'email', 'profilePicture']
-                },
-                {
-                    model: User,
-                    as: 'createdBy',
-                    attributes: ['userId', 'fullName']
+                    attributes: ['equipmentName']
                 }
             ],
-            order: [['scheduledDate', 'ASC']]
+            order: [['scheduledDate', 'ASC']],
+            limit: 10
         });
 
         res.json({
@@ -204,14 +84,12 @@ export const getOverdueRequests = async (req, res) => {
     }
 };
 
-// Get requests count by team (for reports/charts)
+// Get requests by team
 export const getRequestsByTeam = async (req, res) => {
     try {
-        const requestsByTeam = await MaintenanceRequest.findAll({
+        const data = await MaintenanceRequest.findAll({
             attributes: [
-                'maintenanceTeamId',
-                'stage',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
+                [fn('COUNT', col('*')), 'count'] // Use * instead of specific column
             ],
             include: [
                 {
@@ -220,56 +98,34 @@ export const getRequestsByTeam = async (req, res) => {
                     attributes: ['teamName']
                 }
             ],
-            group: ['maintenanceTeamId', 'stage']
+            group: ['maintenanceTeam.team_id', 'maintenanceTeam.team_name'], // Use actual DB column names
+            raw: true
         });
 
-        // Organize data by team
-        const teamData = {};
-        requestsByTeam.forEach(item => {
-            const teamId = item.maintenanceTeamId;
-            const teamName = item.maintenanceTeam.teamName;
-            const stage = item.stage;
-            const count = parseInt(item.getDataValue('count'));
-
-            if (!teamData[teamId]) {
-                teamData[teamId] = {
-                    teamId,
-                    teamName,
-                    new: 0,
-                    in_progress: 0,
-                    repaired: 0,
-                    scrapped: 0,
-                    total: 0
-                };
-            }
-
-            teamData[teamId][stage] = count;
-            teamData[teamId].total += count;
-        });
-
-        const data = Object.values(teamData);
+        const formatted = data.map(item => ({
+            teamName: item['maintenanceTeam.teamName'] || 'Unassigned',
+            count: parseInt(item.count)
+        }));
 
         res.json({
             success: true,
-            data
+            data: formatted
         });
     } catch (error) {
         console.error('Get requests by team error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to fetch team report'
+            message: error.message || 'Failed to fetch requests by team'
         });
     }
 };
 
-// Get requests count by category (for reports/charts)
+// Get requests by category
 export const getRequestsByCategory = async (req, res) => {
     try {
-        const requestsByCategory = await MaintenanceRequest.findAll({
+        const data = await MaintenanceRequest.findAll({
             attributes: [
-                'categoryId',
-                'stage',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
+                [fn('COUNT', col('*')), 'count'] // Use * instead of specific column
             ],
             include: [
                 {
@@ -278,73 +134,49 @@ export const getRequestsByCategory = async (req, res) => {
                     attributes: ['categoryName']
                 }
             ],
-            group: ['categoryId', 'stage']
+            group: ['category.category_id', 'category.category_name'], // Use actual DB column names
+            raw: true
         });
 
-        // Organize data by category
-        const categoryData = {};
-        requestsByCategory.forEach(item => {
-            const categoryId = item.categoryId;
-            const categoryName = item.category.categoryName;
-            const stage = item.stage;
-            const count = parseInt(item.getDataValue('count'));
-
-            if (!categoryData[categoryId]) {
-                categoryData[categoryId] = {
-                    categoryId,
-                    categoryName,
-                    new: 0,
-                    in_progress: 0,
-                    repaired: 0,
-                    scrapped: 0,
-                    total: 0
-                };
-            }
-
-            categoryData[categoryId][stage] = count;
-            categoryData[categoryId].total += count;
-        });
-
-        const data = Object.values(categoryData);
+        const formatted = data.map(item => ({
+            categoryName: item['category.categoryName'] || 'Uncategorized',
+            count: parseInt(item.count)
+        }));
 
         res.json({
             success: true,
-            data
+            data: formatted
         });
     } catch (error) {
         console.error('Get requests by category error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to fetch category report'
+            message: error.message || 'Failed to fetch requests by category'
         });
     }
 };
 
-// Get requests over time (for line charts)
+// Get requests over time (last 30 days)
 export const getRequestsOverTime = async (req, res) => {
     try {
         const { days = 30 } = req.query;
-        const daysAgo = new Date();
-        daysAgo.setDate(daysAgo.getDate() - parseInt(days));
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - parseInt(days));
 
-        const requests = await MaintenanceRequest.findAll({
+        const data = await MaintenanceRequest.findAll({
             attributes: [
-                [fn('DATE', literal('`MaintenanceRequest`.`created_at`')), 'date'],
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count']
+                [fn('DATE', col('created_at')), 'date'], // Use actual DB column name
+                [fn('COUNT', col('*')), 'count']
             ],
             where: {
                 createdAt: {
-                    [Op.gte]: daysAgo
+                    [Op.gte]: startDate
                 }
             },
-            group: [fn('DATE', literal('`MaintenanceRequest`.`created_at`'))],
-            order: [[fn('DATE', literal('`MaintenanceRequest`.`created_at`')), 'ASC']]
+            group: [fn('DATE', col('created_at'))],
+            order: [[fn('DATE', col('created_at')), 'ASC']],
+            raw: true
         });
-
-        const data = requests.map(item => ({
-            date: item.getDataValue('date'),
-            count: parseInt(item.getDataValue('count'))
-        }));
 
         res.json({
             success: true,
@@ -354,7 +186,7 @@ export const getRequestsOverTime = async (req, res) => {
         console.error('Get requests over time error:', error);
         res.status(500).json({
             success: false,
-            message: error.message || 'Failed to fetch time series data'
+            message: error.message || 'Failed to fetch requests over time'
         });
     }
 };
@@ -362,62 +194,49 @@ export const getRequestsOverTime = async (req, res) => {
 // Get technician performance
 export const getTechnicianPerformance = async (req, res) => {
     try {
-        const technicianStats = await MaintenanceRequest.findAll({
+        const data = await MaintenanceRequest.findAll({
             attributes: [
-                'assignedToUserId',
                 'stage',
-                [fn('COUNT', literal('`MaintenanceRequest`.`request_id`')), 'count'],
-                [fn('AVG', literal('`MaintenanceRequest`.`duration_hours`')), 'avgDuration']
+                [fn('COUNT', col('*')), 'count']
             ],
-            where: {
-                assignedToUserId: { [Op.not]: null }
-            },
             include: [
                 {
                     model: User,
                     as: 'assignedTo',
-                    attributes: ['userId', 'fullName', 'email', 'profilePicture']
+                    attributes: ['fullName'],
+                    where: {
+                        role: 'technician'
+                    }
                 }
             ],
-            group: ['assignedToUserId', 'stage']
+            group: ['assignedTo.user_id', 'assignedTo.full_name', 'stage'], // Use actual DB column names
+            raw: true
         });
 
-        // Organize data by technician
-        const techData = {};
-        technicianStats.forEach(item => {
-            const userId = item.assignedToUserId;
-            const user = item.assignedTo;
-            const stage = item.stage;
-            const count = parseInt(item.getDataValue('count'));
-            const avgDuration = parseFloat(item.getDataValue('avgDuration')) || 0;
-
-            if (!techData[userId]) {
-                techData[userId] = {
-                    userId,
-                    fullName: user.fullName,
-                    email: user.email,
-                    profilePicture: user.profilePicture,
-                    new: 0,
-                    in_progress: 0,
-                    repaired: 0,
-                    scrapped: 0,
-                    total: 0,
-                    avgDuration: 0
+        // Group by technician
+        const techMap = {};
+        data.forEach(item => {
+            const name = item['assignedTo.fullName'] || 'Unassigned';
+            if (!techMap[name]) {
+                techMap[name] = {
+                    technicianName: name,
+                    completed: 0,
+                    inProgress: 0,
+                    total: 0
                 };
             }
-
-            techData[userId][stage] = count;
-            techData[userId].total += count;
-            if (stage === 'repaired') {
-                techData[userId].avgDuration = avgDuration.toFixed(2);
+            const count = parseInt(item.count);
+            if (item.stage === 'completed' || item.stage === 'repaired') {
+                techMap[name].completed += count;
+            } else if (item.stage === 'in_progress') {
+                techMap[name].inProgress += count;
             }
+            techMap[name].total += count;
         });
-
-        const data = Object.values(techData);
 
         res.json({
             success: true,
-            data
+            data: Object.values(techMap)
         });
     } catch (error) {
         console.error('Get technician performance error:', error);

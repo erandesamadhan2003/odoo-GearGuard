@@ -5,7 +5,7 @@ import { Op } from 'sequelize';
 export const getAllRequests = async (req, res) => {
     try {
         const { stage, priority, requestType, equipmentId, teamId, assignedToUserId } = req.query;
-        
+
         const where = {};
         if (stage) where.stage = stage;
         if (priority) where.priority = priority;
@@ -247,10 +247,10 @@ export const updateRequestStage = async (req, res) => {
 
         const oldStage = request.stage;
         const updateData = { stage };
-        
+
         if (notes) updateData.notes = notes;
         if (durationHours) updateData.durationHours = durationHours;
-        
+
         if (stage === 'completed' || stage === 'repaired' || stage === 'scrapped' || stage === 'cancelled') {
             updateData.completedDate = new Date();
             if (!request.assignedToUserId) {
@@ -264,9 +264,9 @@ export const updateRequestStage = async (req, res) => {
         if (stage === 'scrapped' || stage === 'cancelled') {
             const equipment = await Equipment.findByPk(request.equipmentId);
             if (equipment) {
-                await equipment.update({ 
+                await equipment.update({
                     status: 'scrapped',
-                    notes: equipment.notes 
+                    notes: equipment.notes
                         ? `${equipment.notes}\n[${new Date().toISOString()}] Equipment marked as scrapped due to request: ${request.subject}`
                         : `[${new Date().toISOString()}] Equipment marked as scrapped due to request: ${request.subject}`
                 });
@@ -328,7 +328,7 @@ export const assignRequest = async (req, res) => {
         }
 
         const oldAssignedTo = request.assignedToUserId;
-        await request.update({ 
+        await request.update({
             assignedToUserId,
             stage: request.stage === 'new' ? 'in_progress' : request.stage
         });
@@ -426,8 +426,8 @@ export const getCalendarRequests = async (req, res) => {
         res.status(500).json({
             success: false,
             message: error.message || 'Failed to fetch calendar requests'
-            });
-        }
+        });
+    }
 };
 
 // Get my requests (created by current user)
@@ -476,13 +476,30 @@ export const getAssignedToMeRequests = async (req, res) => {
                     attributes: ['equipmentId', 'equipmentName', 'serialNumber']
                 },
                 {
+                    model: EquipmentCategory,
+                    as: 'category',
+                    attributes: ['categoryId', 'categoryName']
+                },
+                {
+                    model: MaintenanceTeam,
+                    as: 'maintenanceTeam',
+                    attributes: ['teamId', 'teamName']
+                },
+                {
                     model: User,
                     as: 'createdBy',
+                    attributes: ['userId', 'fullName', 'email']
+                },
+                {
+                    model: User,
+                    as: 'assignedTo',
                     attributes: ['userId', 'fullName', 'email']
                 }
             ],
             order: [['createdAt', 'DESC']]
         });
+
+        console.log(`Found ${requests.length} requests assigned to user ${req.user.id}`);
 
         res.json({
             success: true,
