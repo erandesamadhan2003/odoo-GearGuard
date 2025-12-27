@@ -78,7 +78,7 @@ export const KanbanCard = ({ request }) => {
           {request.assignedTo && (
             <div className="flex items-center gap-1 text-xs text-slate-500">
               <User className="w-3 h-3 text-purple-500" />
-              <span className="truncate max-w-[100px]">
+              <span className="truncate max-w-30">
                 {request.assignedTo.fullName}
               </span>
             </div>
