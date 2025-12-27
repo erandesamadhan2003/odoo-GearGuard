@@ -15,7 +15,12 @@ import moment from "moment";
 import { isAdminOrManager, isTechnician, isOperator } from "@/utils/roles";
 
 const getPriorityVariant = (priority) => {
-  const map = { low: "default", medium: "info", high: "warning", urgent: "danger" };
+  const map = {
+    low: "default",
+    medium: "info",
+    high: "warning",
+    urgent: "danger",
+  };
   return map[priority] || "default";
 };
 
@@ -36,18 +41,20 @@ export const RequestsPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
-  const { 
-    requests, 
-    assignedRequests, 
+  const {
+    requests,
+    assignedRequests,
     myRequests,
-    loading, 
+    loading,
     getAllRequests,
     getAssignedRequests,
-    getMyRequests
+    getMyRequests,
   } = useRequest();
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [stageFilter, setStageFilter] = useState(searchParams.get("stage") || "");
+  const [stageFilter, setStageFilter] = useState(
+    searchParams.get("stage") || ""
+  );
   const [priorityFilter, setPriorityFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
 
@@ -76,7 +83,8 @@ export const RequestsPage = () => {
       request.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       request.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStage = !stageFilter || request.stage === stageFilter;
-    const matchesPriority = !priorityFilter || request.priority === priorityFilter;
+    const matchesPriority =
+      !priorityFilter || request.priority === priorityFilter;
     const matchesType = !typeFilter || request.requestType === typeFilter;
 
     return matchesSearch && matchesStage && matchesPriority && matchesType;
@@ -89,8 +97,8 @@ export const RequestsPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">
-              {isAdminOrManager(user) 
-                ? "Maintenance Requests" 
+              {isAdminOrManager(user)
+                ? "Maintenance Requests"
                 : isTechnician(user)
                 ? "Assigned Requests"
                 : "My Requests"}
@@ -225,7 +233,9 @@ export const RequestsPage = () => {
                     {request.scheduledDate && (
                       <div className="flex items-center gap-2">
                         <Clock className="w-4 h-4" />
-                        <span>{moment(request.scheduledDate).format("MMM D, YYYY")}</span>
+                        <span>
+                          {moment(request.scheduledDate).format("MMM D, YYYY")}
+                        </span>
                       </div>
                     )}
                     {request.assignedTo && (
@@ -244,4 +254,3 @@ export const RequestsPage = () => {
     </DashboardLayout>
   );
 };
-

@@ -24,8 +24,8 @@ export const Sidebar = ({ collapsed }) => {
         label: "Dashboard",
         icon: LayoutDashboard,
         path: "/dashboard",
-        roles: ["admin", "manager", "technician", "user"],
-      }, // All roles can see dashboard
+        roles: ["admin", "manager", "technician"], // Removed "user" - operators don't get dashboard
+      },
       {
         label: "Equipment",
         icon: Cpu,

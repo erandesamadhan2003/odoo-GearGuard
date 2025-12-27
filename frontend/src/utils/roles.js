@@ -4,7 +4,7 @@ export const ROLES = {
   ADMIN: 'admin',
   MANAGER: 'manager',
   TECHNICIAN: 'technician',
-  USER: 'user', // Also called "Operator"
+  USER: 'user' || 'operator', // Also called "Operator"
 };
 
 // Check if user has admin privileges

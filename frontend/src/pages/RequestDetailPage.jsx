@@ -3,7 +3,12 @@ import { useParams, useNavigate } from "react-router";
 import { DashboardLayout } from "@/layouts/dashboard/DashboardLayout";
 import { useRequest } from "@/hooks/useRequest";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/common/Card";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/common/Card";
 import { Badge } from "@/components/common/Badge";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
@@ -29,7 +34,8 @@ export const RequestDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { selectedRequest, loading, getRequestById, updateRequestStage } = useRequest();
+  const { selectedRequest, loading, getRequestById, updateRequestStage } =
+    useRequest();
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
@@ -40,15 +46,26 @@ export const RequestDetailPage = () => {
 
   const canEditRequest = (user, request) => {
     if (!user || !request) return false;
-    if (request.createdBy?.userId === user.userId || request.createdBy?.id === user.id) return true;
-    if (request.assignedTo?.userId === user.userId || request.assignedTo?.id === user.id) return true;
+    if (
+      request.createdBy?.userId === user.userId ||
+      request.createdBy?.id === user.id
+    )
+      return true;
+    if (
+      request.assignedTo?.userId === user.userId ||
+      request.assignedTo?.id === user.id
+    )
+      return true;
     if (user.role === "admin" || user.role === "manager") return true;
     return false;
   };
 
   const isAssignedToMe = (user, request) => {
     if (!user || !request || !request.assignedTo) return false;
-    return request.assignedTo.userId === user.userId || request.assignedTo.id === user.id;
+    return (
+      request.assignedTo.userId === user.userId ||
+      request.assignedTo.id === user.id
+    );
   };
 
   const handleStageUpdate = async (newStage) => {
@@ -126,7 +143,9 @@ export const RequestDetailPage = () => {
             </div>
             <div>
               <p className="font-semibold text-lg">Assigned to You</p>
-              <p className="text-blue-100 text-sm">You can update the status of this request</p>
+              <p className="text-blue-100 text-sm">
+                You can update the status of this request
+              </p>
             </div>
           </div>
         )}
@@ -137,10 +156,18 @@ export const RequestDetailPage = () => {
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${getPriorityColor(selectedRequest.priority)}`}>
+                  <span
+                    className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${getPriorityColor(
+                      selectedRequest.priority
+                    )}`}
+                  >
                     {selectedRequest.priority?.toUpperCase()}
                   </span>
-                  <span className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${getStageColor(selectedRequest.stage)}`}>
+                  <span
+                    className={`px-4 py-1.5 rounded-full text-sm font-semibold border ${getStageColor(
+                      selectedRequest.stage
+                    )}`}
+                  >
                     {selectedRequest.stage?.replace("_", " ").toUpperCase()}
                   </span>
                   {selectedRequest.requestType && (
@@ -152,7 +179,9 @@ export const RequestDetailPage = () => {
                 <h1 className="text-3xl font-bold text-slate-900 mb-2">
                   {selectedRequest.subject}
                 </h1>
-                <p className="text-slate-600">Request #{selectedRequest.requestId}</p>
+                <p className="text-slate-600">
+                  Request #{selectedRequest.requestId}
+                </p>
               </div>
 
               {canEditRequest(user, selectedRequest) && (
@@ -173,25 +202,35 @@ export const RequestDetailPage = () => {
               <div className="text-2xl font-bold text-slate-900">
                 {selectedRequest.priority}
               </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide">Priority</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wide">
+                Priority
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-slate-900">
                 {moment(selectedRequest.createdAt).fromNow()}
               </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide">Created</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wide">
+                Created
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-slate-900">
-                {selectedRequest.scheduledDate ? moment(selectedRequest.scheduledDate).format("MMM D") : "N/A"}
+                {selectedRequest.scheduledDate
+                  ? moment(selectedRequest.scheduledDate).format("MMM D")
+                  : "N/A"}
               </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide">Scheduled</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wide">
+                Scheduled
+              </div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-slate-900">
                 {selectedRequest.durationHours || "N/A"}
               </div>
-              <div className="text-xs text-slate-500 uppercase tracking-wide">Hours</div>
+              <div className="text-xs text-slate-500 uppercase tracking-wide">
+                Hours
+              </div>
             </div>
           </div>
         </Card>
@@ -213,16 +252,30 @@ export const RequestDetailPage = () => {
                   return (
                     <button
                       key={stage.value}
-                      onClick={() => !isCurrentStage && handleStageUpdate(stage.value)}
+                      onClick={() =>
+                        !isCurrentStage && handleStageUpdate(stage.value)
+                      }
                       disabled={isCurrentStage || updating}
                       className={`p-4 rounded-lg border-2 transition-all ${
                         isCurrentStage
                           ? "border-blue-600 bg-blue-50"
                           : "border-slate-200 hover:border-blue-400 hover:bg-blue-50"
-                      } ${updating ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
+                      } ${
+                        updating
+                          ? "opacity-50 cursor-not-allowed"
+                          : "cursor-pointer"
+                      }`}
                     >
-                      <StageIcon className={`w-6 h-6 mx-auto mb-2 ${isCurrentStage ? "text-blue-600" : "text-slate-400"}`} />
-                      <p className={`text-sm font-medium ${isCurrentStage ? "text-blue-600" : "text-slate-700"}`}>
+                      <StageIcon
+                        className={`w-6 h-6 mx-auto mb-2 ${
+                          isCurrentStage ? "text-blue-600" : "text-slate-400"
+                        }`}
+                      />
+                      <p
+                        className={`text-sm font-medium ${
+                          isCurrentStage ? "text-blue-600" : "text-slate-700"
+                        }`}
+                      >
                         {stage.label}
                       </p>
                       {isCurrentStage && (
@@ -283,13 +336,19 @@ export const RequestDetailPage = () => {
                       <Wrench className="w-6 h-6 text-blue-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Equipment</p>
-                      <p className="text-lg font-bold text-slate-900">{selectedRequest.equipment.equipmentName}</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Equipment
+                      </p>
+                      <p className="text-lg font-bold text-slate-900">
+                        {selectedRequest.equipment.equipmentName}
+                      </p>
                     </div>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-3">
                     <p className="text-sm text-slate-600">Serial Number</p>
-                    <p className="font-mono text-slate-900 font-semibold">{selectedRequest.equipment.serialNumber}</p>
+                    <p className="font-mono text-slate-900 font-semibold">
+                      {selectedRequest.equipment.serialNumber}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -304,8 +363,12 @@ export const RequestDetailPage = () => {
                       <Tags className="w-6 h-6 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Category</p>
-                      <p className="text-lg font-bold text-slate-900">{selectedRequest.category.categoryName}</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Category
+                      </p>
+                      <p className="text-lg font-bold text-slate-900">
+                        {selectedRequest.category.categoryName}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -321,8 +384,12 @@ export const RequestDetailPage = () => {
                       <Users className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Maintenance Team</p>
-                      <p className="text-lg font-bold text-slate-900">{selectedRequest.maintenanceTeam.teamName}</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Maintenance Team
+                      </p>
+                      <p className="text-lg font-bold text-slate-900">
+                        {selectedRequest.maintenanceTeam.teamName}
+                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -338,12 +405,18 @@ export const RequestDetailPage = () => {
                       {selectedRequest.assignedTo.fullName.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Assigned To</p>
-                      <p className="font-bold text-slate-900">{selectedRequest.assignedTo.fullName}</p>
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Assigned To
+                      </p>
+                      <p className="font-bold text-slate-900">
+                        {selectedRequest.assignedTo.fullName}
+                      </p>
                     </div>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-3">
-                    <p className="text-sm text-slate-600">{selectedRequest.assignedTo.email}</p>
+                    <p className="text-sm text-slate-600">
+                      {selectedRequest.assignedTo.email}
+                    </p>
                   </div>
                 </CardContent>
               </Card>
@@ -362,7 +435,11 @@ export const RequestDetailPage = () => {
                   <Calendar className="w-5 h-5 text-slate-400" />
                   <div>
                     <p className="text-xs text-slate-500">Created</p>
-                    <p className="font-semibold text-slate-900">{moment(selectedRequest.createdAt).format("MMM D, YYYY h:mm A")}</p>
+                    <p className="font-semibold text-slate-900">
+                      {moment(selectedRequest.createdAt).format(
+                        "MMM D, YYYY h:mm A"
+                      )}
+                    </p>
                   </div>
                 </div>
 
@@ -371,7 +448,11 @@ export const RequestDetailPage = () => {
                     <Calendar className="w-5 h-5 text-slate-400" />
                     <div>
                       <p className="text-xs text-slate-500">Scheduled</p>
-                      <p className="font-semibold text-slate-900">{moment(selectedRequest.scheduledDate).format("MMM D, YYYY h:mm A")}</p>
+                      <p className="font-semibold text-slate-900">
+                        {moment(selectedRequest.scheduledDate).format(
+                          "MMM D, YYYY h:mm A"
+                        )}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -381,7 +462,11 @@ export const RequestDetailPage = () => {
                     <CheckCircle className="w-5 h-5 text-green-500" />
                     <div>
                       <p className="text-xs text-slate-500">Completed</p>
-                      <p className="font-semibold text-slate-900">{moment(selectedRequest.completedDate).format("MMM D, YYYY h:mm A")}</p>
+                      <p className="font-semibold text-slate-900">
+                        {moment(selectedRequest.completedDate).format(
+                          "MMM D, YYYY h:mm A"
+                        )}
+                      </p>
                     </div>
                   </div>
                 )}
@@ -389,7 +474,9 @@ export const RequestDetailPage = () => {
                 {selectedRequest.createdBy && (
                   <div className="pt-4 border-t">
                     <p className="text-xs text-slate-500 mb-2">Created by</p>
-                    <p className="font-semibold text-slate-900">{selectedRequest.createdBy.fullName}</p>
+                    <p className="font-semibold text-slate-900">
+                      {selectedRequest.createdBy.fullName}
+                    </p>
                   </div>
                 )}
               </CardContent>
