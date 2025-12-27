@@ -137,7 +137,7 @@ export const RequestDetailPage = () => {
 
         {/* Assignment Badge for Technicians */}
         {isTechnician(user) && isAssignedToMe(user, selectedRequest) && (
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white flex items-center gap-3 shadow-lg">
+          <div className="bg-linear-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white flex items-center gap-3 shadow-lg">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
               <CheckCircle className="w-6 h-6" />
             </div>
@@ -152,7 +152,7 @@ export const RequestDetailPage = () => {
 
         {/* Header Card */}
         <Card className="border-0 shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-slate-50 to-blue-50 p-8 border-b">
+          <div className="bg-linear-to-r from-slate-50 to-blue-50 p-8 border-b">
             <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-3">
@@ -419,7 +419,7 @@ export const RequestDetailPage = () => {
                     </div>
                     <div className="col-span-2 p-6">
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
+                        <div className="w-12 h-12 rounded-full bg-linear-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md">
                           {selectedRequest.assignedTo.fullName.charAt(0)}
                         </div>
                         <div>
