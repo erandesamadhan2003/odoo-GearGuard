@@ -20,17 +20,57 @@ export const Sidebar = ({ collapsed }) => {
   // Filter navigation items based on role matrix
   const getNavItems = () => {
     const allItems = [
-      { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard", roles: ["admin", "manager"] }, // Only Admin/Manager per matrix
-      { label: "Equipment", icon: Cpu, path: "/equipment", roles: ["admin", "manager", "technician", "user"] },
-      { label: "Requests", icon: Wrench, path: "/requests", roles: ["admin", "manager", "technician", "user"] },
-      { label: "Teams", icon: Users, path: "/teams", roles: ["admin", "manager"] },
-      { label: "Categories", icon: Tags, path: "/categories", roles: ["admin"] },
-      { label: "Departments", icon: Building2, path: "/departments", roles: ["admin"] },
-      { label: "Calendar", icon: Calendar, path: "/calendar", roles: ["admin", "manager"] }, // Only Admin/Manager (not in matrix but follows pattern)
-      { label: "Analytics", icon: BarChart3, path: "/analytics", roles: ["admin", "manager"] }, // Only Admin/Manager per matrix
+      {
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        path: "/dashboard",
+        roles: ["admin", "manager", "technician", "user"],
+      }, // All roles can see dashboard
+      {
+        label: "Equipment",
+        icon: Cpu,
+        path: "/equipment",
+        roles: ["admin", "manager", "technician", "user"],
+      },
+      {
+        label: "Requests",
+        icon: Wrench,
+        path: "/requests",
+        roles: ["admin", "manager", "technician", "user"],
+      },
+      {
+        label: "Teams",
+        icon: Users,
+        path: "/teams",
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Categories",
+        icon: Tags,
+        path: "/categories",
+        roles: ["admin"],
+      },
+      {
+        label: "Departments",
+        icon: Building2,
+        path: "/departments",
+        roles: ["admin"],
+      },
+      {
+        label: "Calendar",
+        icon: Calendar,
+        path: "/calendar",
+        roles: ["admin", "manager"],
+      },
+      {
+        label: "Analytics",
+        icon: BarChart3,
+        path: "/analytics",
+        roles: ["admin", "manager"],
+      },
     ];
 
-    return allItems.filter(item => item.roles.includes(user?.role || "user"));
+    return allItems.filter((item) => item.roles.includes(user?.role || "user"));
   };
 
   const navItems = getNavItems();

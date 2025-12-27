@@ -62,9 +62,9 @@ export const canViewAnalytics = (user) => {
   return isAdminOrManager(user);
 };
 
-// Check if user can view dashboard (Admin, Manager only - per matrix)
+// Check if user can view dashboard (ALL roles can view their respective dashboards)
 export const canViewDashboard = (user) => {
-  return isAdmin(user) || isManager(user);
+  return Boolean(user); // All authenticated users can view their dashboard
 };
 
 // Get display name for role (map "user" to "Operator" in UI)
@@ -85,10 +85,8 @@ export const canEditRequest = (user, request) => {
   return false;
 };
 
-// Check if user can update request stage (Admin, Manager, Technician for assigned)
-export const canUpdateRequestStage = (user, request) => {
-  if (isAdminOrManager(user)) return true;
-  if (isTechnician(user) && request?.assignedToUserId === user?.userId) return true;
-  return false;
+// Check if user can update request stage (Admin, Manager, Technician)
+export const canUpdateStage = (user) => {
+  return isAdmin(user) || isManager(user) || isTechnician(user);
 };
 
