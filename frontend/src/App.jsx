@@ -5,9 +5,11 @@ import { Login } from "./pages/auth/Login";
 import { Signup } from "./pages/auth/Signup";
 import { Dashboard } from "./pages/Dashboard";
 import { useSelector } from "react-redux";
+import KanbanPage from "./pages/KanbanPage";
+import { CreateRequestPage } from "./pages/requests/CreateRequestPage";
+import { EditRequestPage } from "./pages/requests/EditRequestPage";
 import { AuthCallBack } from "./pages/auth/AuthCallBack";
 import { useEffect, useState } from "react";
-import { Footer } from "./layouts/Footer";
 
 const ProtectedRoute = ({ children }) => {
   const { token, isAuthenticated } = useSelector((state) => state.auth);
@@ -44,7 +46,7 @@ const PublicRoute = ({ children }) => {
   }, []);
 
   if (!shouldRender) {
-    return null; 
+    return null;
   }
 
   if (token && isAuthenticated) {
@@ -91,7 +93,19 @@ const Router = createBrowserRouter([
     path: "/dashboard",
     element: <Dashboard />,
   },
-
+  ,{
+    path:"/requests",
+    element:<KanbanPage/>,
+  }
+  ,
+  {
+    path:"/requests/new",
+    element:<CreateRequestPage/>
+  },
+  {
+    path:"requests/:id/edit",
+    element:<EditRequestPage/>
+  }
 ]);
 
 function App() {
