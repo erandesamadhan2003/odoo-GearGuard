@@ -35,6 +35,23 @@ export const RequestDetailPage = () => {
     }
   }, [id]);
 
+
+  const canEditRequest = (user, request) => {
+    if (!user || !request) return false;
+
+    // Allow if user is the creator
+    if (request.createdBy?.id === user.id) return true;
+
+    // Allow if user is assigned to the request
+    if (request.assignedTo?.id === user.id) return true;
+
+    // Allow if user is admin (adjust based on your user role structure)
+    if (user.role === 'admin' || user.isAdmin) return true;
+
+    return false;
+  };
+
+
   if (loading || !selectedRequest) {
     return (
       <DashboardLayout>
