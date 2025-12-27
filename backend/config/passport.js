@@ -48,7 +48,7 @@ export const configurePassport = (passportInstance) => {
     );
 
     passportInstance.serializeUser((user, done) => {
-        done(null, user.id);
+        done(null, user.userId || user.id);
     });
 
     passportInstance.deserializeUser(async (id, done) => {
